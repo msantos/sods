@@ -1,0 +1,24 @@
+#!/bin/sh
+
+ARG="$@"
+IP=2
+
+USERNAME=<YOUR USER NAME>
+DOMAIN=<YOUR DOMAIN>
+
+SDT_BIN=~/bin/sdt
+
+OPT_S=0
+for opt; do
+    if [ "$OPT_S" -eq "1" ]; then
+        IP=$(($IP+$opt))
+        OPT_S=0
+    fi
+    case $opt in
+        -s) OPT_S=1 ;;
+    esac
+done
+
+sftp -C -o ProxyCommand="${SDT_BIN} ${ARG} sshdns.${DOMAIN}" ${USERNAME}@127.0.0.${IP}
+
+

@@ -1,0 +1,53 @@
+#!/bin/sh
+
+OS=`uname -s`
+
+case $OS in
+    'Linux')
+        DEF="-DHAVE_SEND"
+        LIB="-lresolv"
+    ;;
+    'Darwin'|'NetBSD')
+        DEF="-DHAVE_SETSOCKOPT -Wno-deprecated-declarations"
+        LIB="-lresolv"
+    ;;
+    'SunOS')
+        LIB="-lresolv"
+    ;;
+    *)
+        echo "Guessing, adjust Makefile by hand ..."
+        LIB="-lresolv"
+    ;;
+
+esac
+
+cat<<EOF>Makefile
+CC=gcc
+RM=rm
+APP=sods
+
+DEF=${DEF}
+LIB=${LIB}
+
+all:
+	\$(CC) \$(DEF) \$(LIB) -g -Wall -o sods sods.c sods_handler.c sods_dns.c sods_io.c \
+		sods_q.c sods_sock.c sods_priv.c base32.c base64.c
+
+clean:
+	-@\$(RM) sods q io fods sock *.o
+
+test_q:
+	\$(CC) -g -Wall -o q test/q.c sods_q.c
+
+test_io:
+	\$(CC) -g -Wall -o io test/io.c sods_io.c sods_q.c
+
+test_sock:
+	\$(CC) -g -Wall -o sock test/sock.c sods_sock.c sods_io.c sods_q.c
+
+test_b64:
+	\$(CC) -g -Wall -o b64 test/b64.c base64.c
+
+test_fods:
+	\$(CC) -g -Wall -lcrypto -o fods test/fods.c sods_priv.c sods_sock.c sods_io.c sods_q.c
+EOF

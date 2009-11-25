@@ -1,0 +1,49 @@
+#!/bin/sh
+
+USER=<YOUR USER NAME>
+DOMAIN=<YOUR DOMAIN NAME>
+PROXY="-L 8119:<YOUR PROXY>:8118"
+
+throbber() {
+    COUNT=0
+    echo "Tunnel disconnected, sleeping for $1 second(s): "
+    while [ "$COUNT" -lt "$1" ]; do
+        echo -n "$((COUNT+1)) "
+        sleep 1
+        COUNT=$((COUNT+1))
+    done
+    echo
+    echo "Trying to bring up tunnel now"
+}
+
+ssh-add -l
+if [ "$?" -ne "0" ]; then
+    ssh-add
+fi
+
+ARGS="$@"
+IP=2
+
+OPT_S=0
+for opt; do
+    if [ "$OPT_S" -eq "1" ]; then
+        IP=$(($IP+$opt))
+        OPT_S=0
+    fi
+    case $opt in
+        -s) OPT_S=1 ;;
+    esac
+done
+
+RETRY=1
+while [ "$RETRY" -lt "4" ]; do
+    ssh -t ${PROXY} -C -o ProxyCommand="~/bin/sdt ${ARGS} sshdns.${DOMAIN}" ${USER}@127.0.0.${IP} "screen -dR sshdns"
+    if [ "$?" -ne "0" ]; then
+        throbber $RETRY
+    else
+        exit 0
+    fi
+    RETRY=$((RETRY+1))
+done
+
+
