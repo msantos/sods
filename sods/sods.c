@@ -193,11 +193,11 @@ usage(SDS_STATE *ss)
             "             -c     max connections\n"
             "             -D     run as a daemon\n"
             "             -d     chroot directory\n"
-            "             -g     group\n"
+            "             -g     unprivileged group\n"
             "             -i     local IP address\n"
             "             -L     forward socket: <host>:<port>\n"
             "             -p     port\n"
-            "             -u     group\n"
+            "             -u     unprivileged user\n"
             "             -v     verbose\n"
             "             -x     connection timeout\n"
             );
