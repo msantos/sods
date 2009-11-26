@@ -379,7 +379,7 @@ usage(SDT_STATE *ss)
     (void)fprintf(stderr, "-M\tMaximum number of polling query failures [default: %d]\n", ss->maxpollfail);
     (void)fprintf(stderr, "-m\tMinimum time to sleep between nameserver queries [default: %d us]\n", ss->sleep);
     (void)fprintf(stderr, "-R <number>\tNumber of retries for lookup\n");
-    (void)fprintf(stderr, "-r\tNameserver\n");
+    (void)fprintf(stderr, "-r\tNameserver (or keyword: random, opendns, verizon, speakeasy)\n");
     (void)fprintf(stderr, "-S [rotate|blast]\tResolver strategy\n");
     (void)fprintf(stderr, "-T <number>\tUse TCP [0 = new connection for each request, 1 = pipeline requests]\n");
     (void)fprintf(stderr, "-t <DNS type>\tTXT, CNAME [Default = TXT]\n");
