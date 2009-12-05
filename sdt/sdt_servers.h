@@ -48,6 +48,9 @@ static SDS_SERV dnsserv[] = {
     {"speakeasy", "Washington", "66.92.159.2"},
     {"speakeasy", "Secondary (tenerus)", "216.231.41.2"},
 
+    {"google", "google-public-dns-a.google.com", "8.8.8.8"},
+    {"google", "google-public-dns-b.google.com", "8.8.4.4"},
+
     {NULL, NULL, NULL}
 };
 
