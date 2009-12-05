@@ -1,10 +1,11 @@
 CC=gcc
 RM=rm
 
-STATIC_LIB=/usr/lib/libresolv.a
+#LIB=/usr/lib/libresolv.a
+LIB=-lresolv
 
 all:
-	$(CC) -g -Wall -o ds ds.c iprange.c $(STATIC_LIB)
+	$(CC) -g -Wall -o ds ds.c iprange.c $(LIB)
 
 clean:
 	-@$(RM) ds *.o
