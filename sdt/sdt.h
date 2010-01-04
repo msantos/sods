@@ -98,6 +98,8 @@
 #define MAXBACKOFF  3000    /* 3000 * 20000  = 60,000,000 (1/minute) */
 #define MAXPOLLFAIL  10      /* Number of TXT record failures before giving up */
 
+#define MAXDNAMELIST 256    /* arbitrary cutoff for number of domains */
+
 
 typedef union _SDT_ID {
     struct {
@@ -109,7 +111,9 @@ typedef union _SDT_ID {
 } SDT_ID;
 
 typedef struct _SDT_STATE {
-    char        *dname;
+    char        **dname;
+    int         dname_max;
+    int         dname_iterator;
     SDT_ID      sess;   
     size_t      sum;
     size_t      sum_up;
@@ -125,6 +129,8 @@ typedef struct _SDT_STATE {
     pid_t       child;
     int         verbose;
     int         verbose_lines;
+
+    char *(*dname_next)(void *state);
 } SDT_STATE;
 
 /* Resolver options */
@@ -151,10 +157,13 @@ int sdt_dns_parsens(SDT_STATE *ss, char *buf);
 int sdt_dns_A(SDT_STATE *ss, char *buf, ssize_t n);
 char *sdt_dns_poll(SDT_STATE *ss, size_t *len);
 char *sdt_dns_parse(SDT_STATE *ss, char *pkt, int *pktlen);
-char * sdt_dns_dec_CNAME(SDT_STATE *ss, u_char *data, u_int16_t *n);
-char * sdt_dns_dec_TXT(SDT_STATE *ss, u_char *data, u_int16_t *n);
-char * sdt_dns_dec_NULL(SDT_STATE *ss, u_char *data, u_int16_t *n);
+char *sdt_dns_dec_CNAME(SDT_STATE *ss, u_char *data, u_int16_t *n);
+char *sdt_dns_dec_TXT(SDT_STATE *ss, u_char *data, u_int16_t *n);
+char *sdt_dns_dec_NULL(SDT_STATE *ss, u_char *data, u_int16_t *n);
 void sdt_dns_print_servers(SDT_STATE *ss);
+char *sdt_dns_dn_roundrobin(void *state);
+char *sdt_dns_dn_random(void *state);
+
 
 void sdt_rand_init(void);
 #ifndef HAVE_ARC4RANDOM

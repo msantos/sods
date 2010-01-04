@@ -136,7 +136,7 @@ sdt_dns_A(SDT_STATE *ss, char *buf, ssize_t n)
      *  $temp_payload.$nonce-$sum_up.id-$id.up.$extension
      */
     (void)snprintf(query, sizeof(query), "%s.%u-%u.id-%u.up.%s",
-            dn, nonce, (u_int32_t)ss->sum_up, htonl(ss->sess.id), ss->dname);
+            dn, nonce, (u_int32_t)ss->sum_up, htonl(ss->sess.id), ss->dname_next(ss));
 
     VERBOSE(2, "A:%s\n", query);
     if (res_search(query, ns_c_in, ns_t_a, (u_char *)&pkt, sizeof(pkt)) < 0) {
@@ -166,7 +166,7 @@ sdt_dns_poll(SDT_STATE *ss, size_t *len)
      *  $sum-$nonce.id-$id.down.$extension
      */
     (void)snprintf(query, sizeof(query), "%u-%u.id-%u.down.%s",
-            (u_int32_t)ss->sum, nonce, htonl(ss->sess.id), ss->dname);
+            (u_int32_t)ss->sum, nonce, htonl(ss->sess.id), ss->dname_next(ss));
 
     VERBOSE(2, "POLL:%s\n", query);
 
@@ -414,4 +414,22 @@ sdt_dns_print_servers(SDT_STATE *ss)
         last = ds->name;
     }
 }
+
+
+/* Strategies for iterating through multiple
+ * domain names */
+    char *
+sdt_dns_dn_roundrobin(void *state)
+{
+    SDT_STATE *ss = state;
+    return (ss->dname[ss->dname_iterator++ % ss->dname_max]);
+}
+
+    char *
+sdt_dns_dn_random(void *state)
+{
+    SDT_STATE *ss = state;
+    return (ss->dname[sdt_rand() % ss->dname_max]);
+}
+
 

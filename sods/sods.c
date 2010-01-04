@@ -39,6 +39,7 @@ main (int argc, char *argv[])
     SDS_STATE *ss = NULL;
 
     int ch = 0;
+    int di = 0;
 
     IS_NULL(ss = (SDS_STATE *)calloc(1, sizeof(SDS_STATE)));
 
@@ -102,10 +103,16 @@ main (int argc, char *argv[])
     argc -= optind;
     argv += optind;
 
-    if ( (argc != 1) || (strlen(argv[0]) > NS_MAXDNAME - 1))
+    if ( (argc == 0) || (argc >= MAXDNAMELIST))
         usage(ss);
 
-    IS_NULL(ss->dn = strdup(argv[0]));
+    ss->dn_max = argc;
+    IS_NULL(ss->dn = (char **)calloc(argc, 1));
+    for ( di = 0; di < argc; di++) {
+        if (strlen(argv[di]) > NS_MAXCDNAME - 1)
+            usage(ss);
+            IS_NULL(ss->dn[di] = strdup(argv[di]));
+    }
 
     if (ss->fwd == NULL)
         (void)sds_parse_forward(ss, "127.0.0.1:22");

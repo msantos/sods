@@ -408,6 +408,7 @@ sds_dns_packet(SDS_PKT *pkt, void *data, size_t len)
 sds_dns_checkdn(SDS_STATE *ss, char *domain)
 {
     char *p = NULL;
+    int i = 0;
 
     p = strchr(domain, '.');
     *p++ = '\0';
@@ -417,11 +418,15 @@ sds_dns_checkdn(SDS_STATE *ss, char *domain)
         return (-1);
 #endif
 
-    if (strncmp(ss->dn, p, strlen(ss->dn)+1) != 0) {
-        VERBOSE(1, "rejecting request for domain: %s\n", p);
-        return (-1);
+    if (strcmp(ss->dn[0], "any") == 0)
+        return (0);
+
+    for ( i = 0; i < ss->dn_max; i++) {
+        if (strncmp(ss->dn[i], p, strlen(ss->dn[i])+1) == 0)
+            return (0);
     }
 
-    return (0);
+    VERBOSE(1, "rejecting request for domain: %s\n", p);
+    return (-1);
 }
 

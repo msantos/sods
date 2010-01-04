@@ -40,6 +40,7 @@ main(int argc, char *argv[])
     pid_t pid = 0;
     int nd = 0;
     int ch = 0;
+    int di = 0;
 
     IS_NULL(ss = (SDT_STATE *)calloc(1, sizeof(SDT_STATE)));
 
@@ -57,7 +58,9 @@ main(int argc, char *argv[])
     ss->type = ns_t_txt;
     ss->verbose_lines = 100;
 
-    while ( (ch = getopt(argc, argv, "A:B:b:dF:hM:m:R:r:S:s:T:t:vx:")) != -1) {
+    ss->dname_next = &sdt_dns_dn_roundrobin;
+
+    while ( (ch = getopt(argc, argv, "A:B:b:dF:hM:m:n:R:r:S:s:T:t:vx:")) != -1) {
         switch (ch) {
             case 'A':	/* alarm, delay buf */
                 ss->delay = (u_int32_t)atoi(optarg);
@@ -79,6 +82,14 @@ main(int argc, char *argv[])
                 break;
             case 'm':
                 ss->sleep = (u_int32_t)atoi(optarg);
+                break;
+            case 'n':   /* strategy for shuffling domain name list */
+                if (strcasecmp(optarg, "roundrobin") == 0)
+                    ss->dname_next = &sdt_dns_dn_roundrobin;
+                else if (strcasecmp(optarg, "random") == 0)
+                    ss->dname_next = &sdt_dns_dn_random;
+                else
+                    usage(ss);
                 break;
             case 'R':   /* Retry lookup */
                 sdt_dns_setopt(SDT_RES_RETRY, (u_int32_t)atoi(optarg));
@@ -129,10 +140,16 @@ main(int argc, char *argv[])
     argc -= optind;
     argv += optind;
 
-    if ( (argc != 1) || (strlen(argv[0]) > NS_MAXCDNAME - 1))
+    if ( (argc == 0) || (argc >= MAXDNAMELIST))
         usage(ss);
 
-    IS_NULL(ss->dname = strdup(argv[0]));
+    ss->dname_max = argc;
+    IS_NULL(ss->dname = (char **)calloc(argc, 1));
+    for ( di = 0; di < argc; di++) {
+        if (strlen(argv[di]) > NS_MAXCDNAME - 1)
+            usage(ss);
+        IS_NULL(ss->dname[di] = strdup(argv[di]));
+    }
 
     IS_ERR(nd = open("/dev/null", O_RDWR, 0));
 
@@ -390,8 +407,9 @@ usage(SDT_STATE *ss)
     (void)fprintf(stderr, "-F <num>\tFast start, number of small packets to pass w/out buffering (0 to disable) [default: %d]\n", ss->faststart);
     (void)fprintf(stderr, "-M\tMaximum number of polling query failures [default: %d]\n", ss->maxpollfail);
     (void)fprintf(stderr, "-m\tMinimum time to sleep between nameserver queries [default: %d us]\n", ss->sleep);
+    (void)fprintf(stderr, "-n <roundrobin|random>\tStrategy for shuffling domain names [default: roundrobin]\n");
     (void)fprintf(stderr, "-R <number>\tNumber of retries for lookup\n");
-    (void)fprintf(stderr, "-r\tNameserver (or keyword: random, opendns, verizon, speakeasy)\n");
+    (void)fprintf(stderr, "-r\tNameserver (or keyword: random, opendns, verizon, speakeasy, google)\n");
     (void)fprintf(stderr, "-S [rotate|blast]\tResolver strategy\n");
     (void)fprintf(stderr, "-T <number>\tUse TCP [0 = new connection for each request, 1 = pipeline requests]\n");
     (void)fprintf(stderr, "-t <DNS type>\tTXT, CNAME [Default = TXT]\n");

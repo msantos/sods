@@ -80,7 +80,8 @@
 #define BUFLEN          110
 #define NS_TXTREC       65535   /* see http://www.zeroconf.org/Rendezvous/txtrecords.html */
 
-#define MAXFWDS  32     /* Maximum number of allowed forwarders */
+#define MAXFWDS         32      /* Maximum number of allowed forwarders */
+#define MAXDNAMELIST    256     /* Maximum number of domain names */
 
 typedef struct _SDS_FWD {
     u_int8_t    sess;           /* Unused */
@@ -89,7 +90,8 @@ typedef struct _SDS_FWD {
 
 typedef struct _SDS_STATE {
     int s;
-    char *dn;
+    char **dn;
+    int dn_max;
     char *func;                     /* sshdns, socket ... */
     SDS_FWD *fwd;
     size_t fwds;                    /* number of forwarded sessions */
