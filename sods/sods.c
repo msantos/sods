@@ -135,7 +135,7 @@ sds_parse_forward(SDS_STATE *ss, char *buf)
     if (ss->fwds > MAXFWDS)
         return (0);
 
-    IS_NULL(dst = port = strdup(buf));
+    IS_NULL(port = strdup(buf));
 
     if ( (port = strchr(dst, ':')) == NULL)
         return (-1);

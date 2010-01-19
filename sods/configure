@@ -34,20 +34,6 @@ all:
 		sods_q.c sods_sock.c sods_priv.c base32.c base64.c
 
 clean:
-	-@\$(RM) sods q io fods sock *.o
+	-@\$(RM) sods *.o
 
-test_q:
-	\$(CC) -g -Wall -o q test/q.c sods_q.c
-
-test_io:
-	\$(CC) -g -Wall -o io test/io.c sods_io.c sods_q.c
-
-test_sock:
-	\$(CC) -g -Wall -o sock test/sock.c sods_sock.c sods_io.c sods_q.c
-
-test_b64:
-	\$(CC) -g -Wall -o b64 test/b64.c base64.c
-
-test_fods:
-	\$(CC) -g -Wall -lcrypto -o fods test/fods.c sods_priv.c sods_sock.c sods_io.c sods_q.c
 EOF
