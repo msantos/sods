@@ -429,7 +429,7 @@ sdt_dns_dn_roundrobin(void *state)
 sdt_dns_dn_random(void *state)
 {
     SDT_STATE *ss = state;
-    return (ss->dname[sdt_rand() % ss->dname_max]);
+    return (ss->dname[arc4random() % ss->dname_max]);
 }
 
 

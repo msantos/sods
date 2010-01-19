@@ -25,7 +25,7 @@
 
 #include <arpa/nameser.h>
 
-#define SDT_VERSION     "0.7"
+#define SDT_VERSION     "0.8"
 
 #ifdef HAVE_ERRX
 #include <err.h>
