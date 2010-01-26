@@ -196,7 +196,7 @@ sdt_dns_parse(SDT_STATE *ss, char *pkt, int *pktlen)
     int type = 0;
 
     if (ns_initparse((u_char *)pkt, *pktlen, &nsh) < 0) {
-        VERBOSE(1, "Invalid response in record");
+        VERBOSE(1, "Invalid response in record\n");
         return (NULL);
     }
 
@@ -205,13 +205,13 @@ sdt_dns_parse(SDT_STATE *ss, char *pkt, int *pktlen)
         if (ns_parserr(&nsh, ns_s_an, i, &rr)) {
 #endif
         if (ns_parserr(&nsh, ns_s_an, 0, &rr)) {
-            VERBOSE(1, "ns_parserr");
+            VERBOSE(1, "ns_parserr\n");
             *pktlen = 0;
             return (NULL);
         }
 
         if (ns_rr_type(rr) != ss->type) {
-            VERBOSE(1, "ns_rr_type != ns_t_txt");
+            VERBOSE(1, "ns_rr_type != ns_t_txt\n");
             /* continue; */
             *pktlen = 0;
             return (NULL);
@@ -278,7 +278,7 @@ sdt_dns_dec_TXT(SDT_STATE *ss, u_char *data, u_int16_t *n)
             (void)memmove(lf, lf+1, strlen(lf));
 
         if (base64_decode_alloc(rec.data, strlen(rec.data), &out, &outlen) == 0) {
-            VERBOSE(0, "Invalid base64 encoded packet");
+            VERBOSE(0, "Invalid base64 encoded packet\n");
             free(buf);
             return (NULL);
         }
@@ -336,7 +336,7 @@ sdt_dns_dec_NULL(SDT_STATE *ss, u_char *data, u_int16_t *n)
         (void)memmove(lf, lf+1, strlen(lf));
 
     if (base64_decode_alloc((char *)data, *n, &out, &outlen) == 0) {
-        VERBOSE(0, "Invalid base64 encoded packet");
+        VERBOSE(0, "Invalid base64 encoded packet\n");
         return (NULL);
     }
 
