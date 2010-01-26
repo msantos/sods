@@ -68,7 +68,7 @@ main (int argc, char *argv[])
                 IS_NULL(ss->proc.chroot = strdup(optarg));
                 break;
             case 'g':
-                IS_NULL(ss->proc.user = strdup(optarg));
+                IS_NULL(ss->proc.group = strdup(optarg));
                 break;
             case 'i':
                 if (inet_aton(optarg, &ss->local.sin_addr) != 1) {
@@ -86,7 +86,7 @@ main (int argc, char *argv[])
                 ss->local.sin_port = htons((in_port_t)atoi(optarg));
                 break;
             case 'u':
-                IS_NULL(ss->proc.group = strdup(optarg));
+                IS_NULL(ss->proc.user = strdup(optarg));
                 break;
             case 'v':
                 ss->verbose++;
@@ -135,7 +135,7 @@ sds_parse_forward(SDS_STATE *ss, char *buf)
     if (ss->fwds > MAXFWDS)
         return (0);
 
-    IS_NULL(port = strdup(buf));
+    IS_NULL(dst = strdup(buf));
 
     if ( (port = strchr(dst, ':')) == NULL)
         return (-1);
