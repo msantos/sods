@@ -27,7 +27,7 @@
 
 #define SDS_CHROOT  "/var/chroot/sods"
 
-#define SETVAR(x, y)    ((x) = ((x) == NULL) ? (y) : (x))
+#define SETVAR(x, y)    ((x) = ((x) == NULL ? (y) : (x)))
 
 
 void sds_priv_daemon(SDS_STATE *ss);
