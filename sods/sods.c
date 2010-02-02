@@ -107,7 +107,7 @@ main (int argc, char *argv[])
         usage(ss);
 
     ss->dn_max = argc;
-    IS_NULL(ss->dn = (char **)calloc(argc, 1));
+    IS_NULL(ss->dn = (char **)calloc(argc, sizeof(char *)));
     for ( di = 0; di < argc; di++) {
         if (strlen(argv[di]) > NS_MAXCDNAME - 1)
             usage(ss);
