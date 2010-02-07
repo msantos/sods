@@ -14,7 +14,7 @@ WHAT DO I NEED TO BUILD IT?
 Not much. OpenSSL is optional, if your OS doesn't support
 arc4random().
 
-sods has been built it on Ubuntu Linux, Maemo, OpenWRT, Mac OS X and
+sods has been built on Ubuntu Linux, Maemo, OpenWRT, Mac OS X and
 Solaris 8.
 
 Using the sods client requires OpenSSH at the moment.
@@ -43,9 +43,9 @@ sudo ./sods -vvvv -d /tmp -L 127.0.0.1:22 a.example.com # if you have an SSH ser
 # In the sdt directory
 ssh -o ProxyCommand="./sdt -r 127.0.0.1 sshdns.a.example.com" 127.0.0.100
 
-The sods client works best if you have if GNU screen is installed on
-your shell server (see the scripts directory for an example of a script
-to reconnect if the connection is dropped).
+The sods client works best if you have GNU screen is installed on
+your shell server (see the scripts directory for an example of a
+script to reconnect if the connection is dropped).
 
 
 WHY WOULD I WANT TO USE IT?
@@ -77,7 +77,7 @@ FEATURES
 
 * round robin packets between name servers
 
-* bounce connections off of recursive name servers (-r random)
+* bounce connections off of public recursive name servers (-r random)
 
 * dynamic backoff/throttling of client
 

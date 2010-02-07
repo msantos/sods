@@ -56,13 +56,14 @@ sds_dns_type(SDS_PKT *pkt)
     int
 sds_dns_getdn(SDS_STATE *ss, SDS_PKT *pkt)
 {
+    u_char *p = NULL;
+
     /* Truncate the query, if a recursive DNS server has added
      * additional records.
      */
     if ( (pkt->data.hdr.no_additional > 0) ||
             (pkt->data.hdr.no_answers > 0) ||
             (pkt->data.hdr.no_authority > 0)) {
-        u_char *p = NULL;
 
         VERBOSE(3, "Truncating query: no_additional = %d, no_answers = %d, no_authority = %d\n",
                 htons(pkt->data.hdr.no_additional), htons(pkt->data.hdr.no_answers),
