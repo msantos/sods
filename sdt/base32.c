@@ -1,5 +1,5 @@
 /* (PD) 2001 The Bitzi Corporation
- * Please see file COPYING or http://bitzi.com/publicdomain 
+ * Please see file COPYING or http://bitzi.com/publicdomain
  * for more info.
  *
  * $Id: base32.c,v 1.1.1.1 2008-02-24 12:28:23 user Exp $

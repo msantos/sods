@@ -2,17 +2,17 @@
  * Socket over DNS server.
  *
  * Copyright (c) 2009 Michael Santos <michael.santos@gmail.com>
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -180,23 +180,23 @@ sds_dns_query_TXT(void *state, void *packet)
  *  Zero header, except for opcode and
  *  recursion request.
  *
- * 7    9    0    0  
+ * 7    9    0    0
  * 0111 1001 0000 0000
  * .111 1... .... .... opcode
  * .... ...1 .... .... recursion desired
  *
  *  Set response and authoritative bit.s
  *
- * 8    4    8    0  
+ * 8    4    8    0
  * 1000 0000 0000 0000
  * 1... .... .... .... message is a response
  * .... .1.. .... .... authoritative server
  * .... .... 1... .... recursion available
  *
- * 0    0    0    5  
+ * 0    0    0    5
  * 0000 0000 0000 0101 error: REFUSED
  *
- * 0    0    0    2  
+ * 0    0    0    2
  * 0000 0000 0000 0101 error: SERVFAIL
  *
  */
@@ -292,7 +292,7 @@ sds_dns_enc_CNAME(void *state, void *packet)
     p = buf;
 
     /* Compressed name:
-     * 
+     *
      *  www.google.com
      *  CNAME: www.l.google.com
      *  <len><data><len><data><pointer>
@@ -300,7 +300,7 @@ sds_dns_enc_CNAME(void *state, void *packet)
      *
      * If there is no pointer, the domain
      * name is null terminated.
-     *  
+     *
      * www.apple.com
      * CNAME: www.apple.com.akadns.net
      *
@@ -312,7 +312,7 @@ sds_dns_enc_CNAME(void *state, void *packet)
      * 03 6e 65 74 = net
      * 00 = terminating NULL
      *
-     * NS_MAXLABEL includes the length 
+     * NS_MAXLABEL includes the length
      * byte.
      *
      */

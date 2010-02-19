@@ -2,17 +2,17 @@
  * Socket over DNS client.
  *
  * Copyright (c) 2009 Michael Santos <michael.santos@gmail.com>
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -274,7 +274,7 @@ sdt_dns_dec_TXT(SDT_STATE *ss, u_char *data, u_int16_t *n)
         (void)memcpy(rec.data, p+1, *p);
 
         /* Remove base64 linefeeds used for formatting */
-        while ( (lf = strchr(rec.data, 0x0A)) != NULL) 
+        while ( (lf = strchr(rec.data, 0x0A)) != NULL)
             (void)memmove(lf, lf+1, strlen(lf));
 
         if (base64_decode_alloc(rec.data, strlen(rec.data), &out, &outlen) == 0) {
@@ -332,7 +332,7 @@ sdt_dns_dec_NULL(SDT_STATE *ss, u_char *data, u_int16_t *n)
         return (NULL);
 
     /* Remove base64 linefeeds used for formatting */
-    while ( (lf = strchr((char *)data, 0x0A)) != NULL) 
+    while ( (lf = strchr((char *)data, 0x0A)) != NULL)
         (void)memmove(lf, lf+1, strlen(lf));
 
     if (base64_decode_alloc((char *)data, *n, &out, &outlen) == 0) {
