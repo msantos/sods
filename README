@@ -17,8 +17,6 @@ arc4random().
 sods has been built on Ubuntu Linux, Maemo, OpenWRT, Mac OS X and
 Solaris 8.
 
-Using the sods client requires OpenSSH at the moment.
-
 
 HOW DO I BUILD IT?
 
@@ -43,15 +41,19 @@ sudo ./sods -vvvv -d /tmp -L 127.0.0.1:22 a.example.com # if you have an SSH ser
 # In the sdt directory
 ssh -o ProxyCommand="./sdt -r 127.0.0.1 sshdns.a.example.com" 127.0.0.100
 
-The sods client works best if you have GNU screen is installed on
-your shell server (see the scripts directory for an example of a
-script to reconnect if the connection is dropped).
+# As a TCP proxy
+./sdt p 23233 -r 127.0.0.1 sshdns.a.example.com
+ssh -p 23233 localhost # for OpenSSH
+
+The sods client works best with GNU screen installed on your shell
+server (see the scripts directory for an example of a script to
+reconnect if the connection is dropped).
 
 
 WHY WOULD I WANT TO USE IT?
 
-sods is tiny, easily ported and fast. Well, relatively fast, for a tunnel
-going over DNS. Which means not really very fast.
+sods is tiny, easily ported and fast. Well, sort of fast, for a
+tunnel going over DNS. Which means not really very fast.
 
 sods has a few tricks to get around network limitations.
 
@@ -81,6 +83,8 @@ FEATURES
 
 * dynamic backoff/throttling of client
 
+* client can use be used as a pipe (for OpenSSH) or as a TCP proxy (for other ssh clients)
+
 
 TODO
 
@@ -92,4 +96,5 @@ protocol!!
 
 * write an Erlang client
 
+* multiplex connections to the TCP proxy
 

@@ -25,6 +25,9 @@
 
 #include <arpa/nameser.h>
 
+#include <netinet/in.h>
+#include <sys/socket.h>
+
 #define SDT_VERSION     "0.8"
 
 #ifdef HAVE_ERRX
@@ -130,6 +133,10 @@ typedef struct _SDT_STATE {
     int         verbose;
     int         verbose_lines;
 
+    u_int16_t   proxy_port;
+    int         fd_in;
+    int         fd_out;
+
     char *(*dname_next)(void *state);
 } SDT_STATE;
 
@@ -143,11 +150,12 @@ enum {
     SDT_RES_DEBUG,          /* Enable resolver debugging */
 };
 
+int sdt_proxy_open(SDT_STATE *ss);
 void sdt_loop_poll(SDT_STATE *ss);
 void sdt_loop_A(SDT_STATE *ss);
 void sdt_send_poll(SDT_STATE *ss);
 void sdt_send_A(SDT_STATE *ss, char *buf, ssize_t n);
-ssize_t sdt_read(SDT_STATE *ss, int fd, char *buf, size_t nbytes);
+ssize_t sdt_read(SDT_STATE *ss, char *buf, size_t nbytes);
 void sdt_alarm(SDT_STATE *ss);
 
 int sdt_dns_init(void);
