@@ -63,7 +63,7 @@ main(int argc, char *argv[])
     ss->fd_in = fileno(stdin);
     ss->fd_out = fileno(stdout);
 
-    while ( (ch = getopt(argc, argv, "A:B:b:dF:hM:m:n:p:R:r:S:s:T:t:vx:")) != -1) {
+    while ( (ch = getopt(argc, argv, "A:B:b:dF:hM:m:n:p:R:r:S:s:T:t:V:vx:")) != -1) {
         switch (ch) {
             case 'A':	/* alarm, delay buf */
                 ss->delay = (u_int32_t)atoi(optarg);
@@ -129,6 +129,9 @@ main(int argc, char *argv[])
                     ss->type = ns_t_null;
                 else
                     usage(ss);
+                break;
+            case 'V':
+                ss->verbose_lines = atoi(optarg);
                 break;
             case 'v':
                 ss->verbose++;
@@ -458,6 +461,7 @@ usage(SDT_STATE *ss)
     (void)fprintf(stderr, "-S [rotate|blast]\tResolver strategy\n");
     (void)fprintf(stderr, "-T <number>\tUse TCP [0 = new connection for each request, 1 = pipeline requests]\n");
     (void)fprintf(stderr, "-t <DNS type>\tTXT, CNAME, NULL [Default = TXT]\n");
+    (void)fprintf(stderr, "-V <num>\tNumber of debug messages\n");
     (void)fprintf(stderr, "-v\tPrint debug messages\n");
     (void)fprintf(stderr, "-x <number>\tResolver transmit timeout\n");
     (void)fprintf(stderr, "\nExample: %s -r 127.0.0.1 sshdns.a.example.com\n\n", __progname);
