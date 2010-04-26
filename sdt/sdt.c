@@ -172,14 +172,16 @@ main(int argc, char *argv[])
         case -1:
             err(EXIT_FAILURE, "fork");
         case 0:
-            if (ss->proxy_port == 0)
-                IS_ERR(dup2(fileno(stdin), nd));
+            if (ss->proxy_port > 0)
+                IS_ERR(dup2(fileno(stdout), nd));
+            IS_ERR(dup2(fileno(stdin), nd));
             (void)signal(SIGUSR1,wakeup);
             sdt_loop_poll(ss);
             break;
         default:
-            if (ss->proxy_port == 0)
-                IS_ERR(dup2(fileno(stdout), nd));
+            if (ss->proxy_port > 0)
+                IS_ERR(dup2(fileno(stdin), nd));
+            IS_ERR(dup2(fileno(stdout), nd));
             (void)signal(SIGHUP,wakeup);
             (void)signal(SIGTERM,wakeup);
             (void)signal(SIGALRM,wakeup);
