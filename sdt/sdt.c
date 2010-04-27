@@ -220,7 +220,9 @@ sdt_proxy_open(SDT_STATE *ss)
     sa.sin_port = htons(ss->proxy_port);
     sa.sin_addr.s_addr = INADDR_ANY;
 
-    IS_ERR(s = socket(AF_INET, SOCK_STREAM, 0));
+    VERBOSE(1, "listening on port = %u\n", ss->proxy_port);
+
+    IS_ERR(s = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP));
 
     IS_ERR(setsockopt(s, SOL_SOCKET, SO_REUSEADDR, &o, sizeof(o)));
 
