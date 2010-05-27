@@ -177,6 +177,8 @@ main (int argc, char *argv[])
     IS_ERR(bind(ds->s, (struct sockaddr *)&ds->lo, sizeof(ds->lo)));
 
     switch ( (pid = fork())) {
+        case -1:
+            err(EXIT_FAILURE, "fork");
         case 0: /* child */
             ds_reader(ds);
             break;
