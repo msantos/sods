@@ -98,3 +98,9 @@ protocol!!
 
 * multiplex connections to the TCP proxy
 
+* allow the client to specify a host/port
+
+For example, if the client requests "mysshserver.com.sshdns.s.example.com",
+the request would cause the sods server to open a port to
+"mysshserver.com" on port 22. To specify a port, the client could
+embed the port, maybe: mysshserver.com-2222.sshdns.s.example.com
