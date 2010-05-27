@@ -104,6 +104,7 @@ sds_dns_query_A(void *state, void *packet)
     char *b32 = NULL;
     char *domain = NULL;
     char *p = NULL;
+    char *q = NULL;
 
     IS_NULL(b32 = strdup(pkt->buf));
     IS_NULL(domain = (char *)calloc(NS_MAXDNAME, 1));
@@ -127,8 +128,9 @@ sds_dns_query_A(void *state, void *packet)
 
     LTZERO(sds_dns_checkdn(ss, domain));
 
-    while ( (p = strchr(b32, '.')) != NULL)
-        (void)memmove(p, p+1, strlen(p));
+    for (p = q = b32; *p != '\0'; p++)
+        if (*p != '.') *q++ = *p;
+    *q = '\0';
 
     pkt->buflen = base32_decode_into(b32, sizeof(pkt->buf), pkt->buf);
     free(b32);
