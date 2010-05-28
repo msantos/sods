@@ -128,7 +128,7 @@ sds_dns_query_A(void *state, void *packet)
 
     LTZERO(sds_dns_checkdn(ss, domain));
 
-    for (p = q = b32; *p != '\0'; p++)
+    for (p = q = b32; *p; p++)
         if (*p != '.') *q++ = *p;
     *q = '\0';
 
