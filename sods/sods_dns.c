@@ -126,7 +126,8 @@ sds_dns_query_A(void *state, void *packet)
 
     *p = '\0';
 
-    LTZERO(sds_dns_checkdn(ss, domain));
+    if (sds_dns_checkdn(ss, domain) < 0)
+        goto ERR;
 
     for (p = q = b32; *p; p++)
         if (*p != '.') *q++ = *p;
@@ -157,18 +158,26 @@ sds_dns_query_TXT(void *state, void *packet)
 
     u_int32_t nonce = 0;
     char *domain = NULL;
+    int rv = 0;
 
     IS_NULL(domain = (char *)calloc(NS_MAXDNAME, 1));
 
     if (sscanf(pkt->buf, "%u-%u.id-%u.down.%32s", (u_int32_t *)&pkt->sum,
-                &nonce, &pkt->sess.id, domain) != 4)
-        return (-1);
+                &nonce, &pkt->sess.id, domain) != 4) {
+        rv = -1;
+        goto ERR;
+    }
 
     pkt->sess.id = ntohl(pkt->sess.id);
 
-    LTZERO(sds_dns_checkdn(ss, domain));
+    if (sds_dns_checkdn(ss, domain) < 0) {
+        rv = -1;
+        goto ERR;
+    }
+
+ERR:
     free(domain);
-    return (0);
+    return (rv);
 }
 
 
