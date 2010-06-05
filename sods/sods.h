@@ -154,7 +154,7 @@ typedef struct _SDS_PKT {
     u_int16_t type;         /* DNS message type */
     struct sockaddr_in sa;  /* client source address */
     char buf[NS_PACKETSZ];
-    size_t buflen;
+    ssize_t buflen;
     size_t sum_up;
     size_t sum;
     int err;
@@ -162,7 +162,7 @@ typedef struct _SDS_PKT {
     size_t nread;           /* amount of data to read from socket */
 
     int (*parse)(void *state, void *packet);
-    int (*encode)(void *state, void *packet);
+    ssize_t (*encode)(void *state, void *packet);
     int (*encapsulate)(void *state, void *packet);
     int (*chksum)(void *state, int a, int b);
     int (*forward)(void *state, void *packet);
@@ -225,10 +225,10 @@ int sds_dns_checkdn(SDS_STATE *ss, char *domain);
 
     /* response */
 void sds_dns_setflags(SDS_STATE *ss, SDS_PKT *pkt);
-int sds_dns_enc_A(void *state, void *packet);
-int sds_dns_enc_TXT(void *state, void *packet);
-int sds_dns_enc_CNAME(void *state, void *packet);
-int sds_dns_enc_NULL(void *state, void *packet);
+ssize_t sds_dns_enc_A(void *state, void *packet);
+ssize_t sds_dns_enc_TXT(void *state, void *packet);
+ssize_t sds_dns_enc_CNAME(void *state, void *packet);
+ssize_t sds_dns_enc_NULL(void *state, void *packet);
 int sds_dns_response(void *state, void *packet);
 void sds_dns_packet(SDS_PKT *pkt, void *data, size_t len);
 

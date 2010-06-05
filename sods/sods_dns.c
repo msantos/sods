@@ -219,7 +219,7 @@ sds_dns_setflags(SDS_STATE *ss, SDS_PKT *pkt)
 /*
  * A response
  */
-    int
+    ssize_t
 sds_dns_enc_A(void *state, void *packet)
 {
     SDS_STATE *ss = (SDS_STATE *)state;
@@ -234,7 +234,7 @@ sds_dns_enc_A(void *state, void *packet)
 /*
  * TXT response
  */
-    int
+    ssize_t
 sds_dns_enc_TXT(void *state, void *packet)
 {
     SDS_STATE *ss = (SDS_STATE *)ss;
@@ -267,7 +267,7 @@ sds_dns_enc_TXT(void *state, void *packet)
 /*
  * CNAME response
  */
-    int
+    ssize_t
 sds_dns_enc_CNAME(void *state, void *packet)
 {
     SDS_STATE *ss = (SDS_STATE *)state;
@@ -278,7 +278,7 @@ sds_dns_enc_CNAME(void *state, void *packet)
     char *cp = NULL;
     int i = 0;
     int j = 0;
-    size_t n = 0;
+    ssize_t n = 0;
 
     NULL_RESPONSE(pkt);
 
@@ -345,7 +345,7 @@ sds_dns_enc_CNAME(void *state, void *packet)
  * NULL response
  *
  */
-    int
+    ssize_t
 sds_dns_enc_NULL(void *state, void *packet)
 {
     SDS_STATE *ss = (SDS_STATE *)ss;
