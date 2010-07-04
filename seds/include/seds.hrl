@@ -34,4 +34,5 @@
 
 -define(CFG, "seds.cfg").
 
+-define(MAXLABEL, 63).  % 1 byte for length of label
 

@@ -28,6 +28,8 @@ b32_(V, Buf) ->
 %% @spec encode(string()) -> base32string()
 %% @doc returns base32 encoded string of String
 %% @see decode/1
+encode(Bin) when is_binary(Bin) ->
+    encode(binary_to_list(Bin));
 encode(String) ->
     lists:reverse(encode_(list_to_binary(String), _Out=[])).
 
@@ -65,6 +67,8 @@ unb32(String=[_|_]) ->
 %% @spec decode(base32string()) -> string()
 %% @doc returns base32 decoded string of String
 %% @see encode/1
+decode(Bin) when is_binary(Bin) ->
+    decode(binary_to_list(Bin));
 decode(String) ->
     Bits=lists:foldl(fun(Elem, Acc) ->
 			     A= unb32([Elem]),

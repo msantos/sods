@@ -48,6 +48,7 @@
 % Interface
 -export([send/5]).
 -export([start_link/2]).
+-export([label/1]).
 % States
 -export([proxy/2]).
 % Behaviours
@@ -217,19 +218,48 @@ seq(N) when is_integer(N) ->
     <<I1,I2,I3,I4>> = <<N:32>>,
     {I1,I2,I3,I4}.
 
-data(txt, [<<>>]) ->
+
+data(_, [<<>>]) ->
     {[],<<>>};
+data(Type, Data) when is_list(Data) ->
+    data(Type, list_to_binary(lists:reverse(Data)));
+
+% TXT records
 data(txt, Data) ->
-    Data1 = list_to_binary(lists:reverse(Data)),
-    case size(Data1) of
+    case byte_size(Data) of
         N when N > ?MAXDATA * 2 ->
-            <<D1:?MAXDATA/bytes, D2:?MAXDATA/bytes, Rest/binary>> = Data1,
+            <<D1:?MAXDATA/bytes, D2:?MAXDATA/bytes, Rest/binary>> = Data,
             {[base64:encode_to_string(D1), base64:encode_to_string(D2)], Rest};
         N when N > ?MAXDATA ->
-            <<D1:?MAXDATA/bytes, Rest/binary>> = Data1,
+            <<D1:?MAXDATA/bytes, Rest/binary>> = Data,
             {[base64:encode_to_string(D1)], Rest};
         _ ->
-            {[base64:encode_to_string(Data1)], <<>>}
+            {[base64:encode_to_string(Data)], <<>>}
+    end;
+
+% NULL records
+data(null, Data) ->
+    case byte_size(Data) of
+        N when N > ?MAXDATA * 2 ->
+            <<D1:(?MAXDATA*2)/bytes, Rest/binary>> = Data,
+            {base64:encode(D1), Rest};
+        _ ->
+            {base64:encode(Data), <<>>}
+    end;
+
+% CNAME records
+data(cname, Data) ->
+    case byte_size(Data) of
+        N when N > ?MAXDATA ->
+            <<D1:?MAXDATA/bytes, Rest/binary>> = Data,
+            {label(base32:encode(D1)), Rest};
+        _ ->
+            {label(base32:encode(Data)), <<>>}
     end.
+
+label(String) when length(String) < ?MAXLABEL ->
+    String;
+label(String) ->
+    re:replace(String, ".{63}", "&.", [global, {return, list}]).
 
 
