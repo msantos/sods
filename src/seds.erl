@@ -65,16 +65,21 @@ start_link(Port) ->
     gen_server:start_link({local, ?SERVER}, ?MODULE, [Port], []).
 
 init([Port]) ->
-    {ok, FD} = procket:listen(53, [
-            {protocol, udp},
-            {family, inet},
-            {type, dgram}
-        ]),
+    Opt = case Port of
+        N when N > 1024 ->
+            [];
+        _ ->
+            {ok, FD} = procket:listen(Port, [
+                {protocol, udp},
+                {family, inet},
+                {type, dgram}
+            ]),
+            [{fd, FD}]
+    end,
     {ok, Socket} = gen_udp:open(Port, [
             binary,
-            {active, once},
-            {fd, FD}
-        ]),
+            {active, once}
+        ] ++ Opt),
     {ok, #state{
             f = config(forward, ?CFG),
             d = config(domains, ?CFG),
