@@ -82,7 +82,7 @@ init([Port]) ->
         ] ++ Opt),
     {ok, #state{
             f = config(forward, ?CFG),
-            d = config(domains, ?CFG),
+            d = [ string:tokens(N, ".") || N <- config(domains, ?CFG) ],
             s = Socket,
             p = orddict:new()
         }}.
@@ -194,8 +194,7 @@ decode({domain, {a, Data}}, Domains) ->
     [Sum, "id", SessionId, "up"|Domain] = string:tokens(Session, ".-"),
 
     % Respond only to the configured list of domains
-    Rdomain = lists:reverse(Domain),
-    true = [ N || N <- Domains, lists:prefix(N, Rdomain) ] /= [],
+    true = [ N || N <- Domains, lists:suffix(N, Domain) ] /= [],
 
     {Forward, Id} = forward(list_to_integer(SessionId)),
 
@@ -214,8 +213,7 @@ decode({domain, {_Type, Data}}, Domains) ->
     [Sum, _Nonce, "id", SessionId, "down"|Domain] = string:tokens(Data, ".-"),
 
     % Respond only to the configured list of domains
-    Rdomain = lists:reverse(Domain),
-    true = [ N || N <- Domains, lists:prefix(N, Rdomain) ] /= [],
+    true = [ N || N <- Domains, lists:suffix(N, Domain) ] /= [],
 
     {Forward, Id} = forward(list_to_integer(SessionId)),
 
@@ -245,8 +243,6 @@ decode({binary, Data}, Domains) ->
     {Query, decode({dns_rec, Query}, Domains)};
 decode(Data, Domains) ->
     try decode({binary, Data}, Domains) of
-        {error, _} ->
-            false;
         Query ->
             Query
     catch
