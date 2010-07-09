@@ -29,9 +29,9 @@ b32_(V, Buf) ->
 %% @doc returns base32 encoded string of String
 %% @see decode/1
 encode(Bin) when is_binary(Bin) ->
-    encode(binary_to_list(Bin));
+    lists:reverse(encode_(Bin, _Out=[]));
 encode(String) ->
-    lists:reverse(encode_(list_to_binary(String), _Out=[])).
+    encode(list_to_binary(String)).
 
 encode_(Bin, Out) ->
     case Bin of
