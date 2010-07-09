@@ -187,15 +187,10 @@ forward(Id) when is_integer(Id) ->
 
 % mfz.wiztb.onsgmcq.40966-0.id-372571.up.p.example.com
 % B64._Nonce-Sum.id-SessionId.up.Domain
-decode({domain, {a, Data}}, Domains) ->
-    {Base64withNonce, Session} = lists:split(string:chr(Data, $-), Data),
+decode({domain, {a, [Base64Nonce, Sum, "id", SessionId, "up"|Domain]}}, Domains) ->
+    true = check_dn(Domain, Domains),
 
-    B64 = string:tokens(Base64withNonce, "."),
-    [Sum, "id", SessionId, "up"|Domain] = string:tokens(Session, ".-"),
-
-    % Respond only to the configured list of domains
-    true = [ N || N <- Domains, lists:suffix(N, Domain) ] /= [],
-
+    B64 = string:tokens(Base64Nonce, "."),
     {Forward, Id} = forward(list_to_integer(SessionId)),
 
     #seds{
@@ -209,11 +204,8 @@ decode({domain, {a, Data}}, Domains) ->
 
 % 0-29941.id-10498.down.s.p.example.com
 % Sum-Nonce.id-SessionId.down.Domain
-decode({domain, {_Type, Data}}, Domains) ->
-    [Sum, _Nonce, "id", SessionId, "down"|Domain] = string:tokens(Data, ".-"),
-
-    % Respond only to the configured list of domains
-    true = [ N || N <- Domains, lists:suffix(N, Domain) ] /= [],
+decode({domain, {_Type, [Sum, _Nonce, "id", SessionId, "down"|Domain]}}, Domains) ->
+    true = check_dn(Domain, Domains),
 
     {Forward, Id} = forward(list_to_integer(SessionId)),
 
@@ -221,7 +213,7 @@ decode({domain, {_Type, Data}}, Domains) ->
         type = down,
         forward = Forward,
         id = Id,
-        sum = list_to_integer(Sum),
+        sum = list_to_integer(lists:reverse(tl(lists:reverse(Sum)))),
         domain = Domain
     };
 
@@ -237,7 +229,9 @@ decode({dns_rec, #dns_rec{
                 }|_]
         }
     }, Domains) ->
-    decode({domain, {Type, Query}}, Domains);
+    {Prefix, Session} = lists:split(string:chr(Query, $-), Query),
+    decode({domain, {Type, [Prefix|string:tokens(Session, ".-")]}}, Domains);
+
 decode({binary, Data}, Domains) ->
     {ok, Query} = inet_dns:decode(Data),
     {Query, decode({dns_rec, Query}, Domains)};
@@ -254,6 +248,9 @@ decode(Data, Domains) ->
             false
     end.
 
+% Respond only to the configured list of domains
+check_dn(Domain, Domains) ->
+    [ N || N <- Domains, lists:suffix(N, Domain) ] /= [].
 
 config(Key, Cfg) ->
     {ok, Map} = file:consult(privpath(Cfg)),
