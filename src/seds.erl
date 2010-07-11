@@ -115,22 +115,13 @@ handle_info({udp, Socket, IP, Port, Data}, #state{
 handle_info({'DOWN', _Ref, process, Pid, _Reason}, #state{
         p = Proxies
     } = State) ->
-    case lists:keyfind(Pid, 2, orddict:to_list(Proxies)) of
-        false ->
-            error_logger:info_report([
-                    {proxy_not_found, Pid},
-                    {proxies, Proxies}
-                ]),
-            {noreply, State};
-        {Key, Pid} ->
-            error_logger:info_report([
-                    {proxy_found, Pid},
-                    {proxies, Proxies}
-                ]),
-            {noreply, State#state{
-                    p = orddict:erase(Key, Proxies)
-                }}
-    end;
+    {noreply, State#state{
+        p = orddict:filter(
+            fun (_,V) when V == Pid -> false;
+                (_,_) -> true
+            end,
+            Proxies)
+    }};
 
 % WTF?
 handle_info(Info, State) ->
