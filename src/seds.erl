@@ -42,6 +42,9 @@
         terminate/2, code_change/3]).
 
 -record(state, {
+        acf = false,                    % allow client forwarding
+        acl = [],                       % forward IP blacklist
+
         f,                              % forwarders map
         s,                              % socket
         d = [],                         % domains
@@ -96,12 +99,11 @@ handle_cast(_Msg, State) ->
 
 % DNS request from client
 handle_info({udp, Socket, IP, Port, Data}, #state{
-        s = Socket,
-        d = Domains
+        s = Socket
     } = State) ->
     ok = inet:setopts(Socket, [{active, once}]),
 
-    case decode(Data, Domains) of
+    case decode(Data, State) of
         false ->
             {noreply, State};
         {#dns_rec{} = Rec, #seds{} = Query} ->
@@ -172,13 +174,54 @@ session(#seds{
     end,
     {lists:nth(F, Map), Id}.
 
+forward({_IP, _Port} = Forward) ->
+    {forward, Forward};
 forward(Id) when is_integer(Id) ->
     <<_Opt:8, Forward:8, SessionId:16>> = <<Id:32>>,
     {{session, Forward}, SessionId}.
 
+
+% mfz.wiztb.onsgmcq.40966-0.id-372571.u.192.168.100.101-2222.x.example.com
+% B64._Nonce-Sum.id-SessionId.u.IP1.IP2.IP3.IP4-Port.x.Domain
+decode({domain, {a, [Base64Nonce, Sum, "id", SessionId, "u",
+                IP1, IP2, IP3, IP4, Port, "x"|Domain]}},
+    #state{d = Domains, acf = true, acl = ACL}) ->
+    true = check_dn(Domain, Domains),
+    true = check_acl({IP1,IP2,IP3,IP4}, ACL),
+
+    B64 = string:tokens(Base64Nonce, "."),
+    Forward = forward({{IP1,IP2,IP3,IP4},Port}),
+
+    #seds{
+        type = up,
+        forward = Forward,
+        id = SessionId,
+        data = lists:flatten(lists:sublist(B64, length(B64)-1)),
+        sum = list_to_integer(Sum),
+        domain = Domain
+    };
+decode({domain, {a, [Base64Nonce, Sum, "id", SessionId, "u",
+                IP1, IP2, IP3, IP4, "x"|Domain]}},
+    #state{d = Domains, acf = true, acl = ACL}) ->
+    true = check_dn(Domain, Domains),
+    true = check_acl({IP1,IP2,IP3,IP4}, ACL),
+
+    B64 = string:tokens(Base64Nonce, "."),
+    Forward = forward({{IP1,IP2,IP3,IP4}, 22}),
+
+    #seds{
+        type = up,
+        forward = Forward,
+        id = SessionId,
+        data = lists:flatten(lists:sublist(B64, length(B64)-1)),
+        sum = list_to_integer(Sum),
+        domain = Domain
+    };
+
 % mfz.wiztb.onsgmcq.40966-0.id-372571.up.p.example.com
 % B64._Nonce-Sum.id-SessionId.up.Domain
-decode({domain, {a, [Base64Nonce, Sum, "id", SessionId, "up"|Domain]}}, Domains) ->
+decode({domain, {a, [Base64Nonce, Sum, "id", SessionId, "up"|Domain]}},
+    #state{d = Domains}) ->
     true = check_dn(Domain, Domains),
 
     B64 = string:tokens(Base64Nonce, "."),
@@ -193,9 +236,46 @@ decode({domain, {a, [Base64Nonce, Sum, "id", SessionId, "up"|Domain]}}, Domains)
         domain = Domain
     };
 
+% 0-29941.id-10498.d.192.168.100.101.s.p.example.com
+% Sum-Nonce.id-SessionId.d.IP1.IP2.IP3.IP4.Domain
+%
+% 0-29941.id-10498.d.192.168.100.101-2222.x.p.example.com
+% Sum-Nonce.id-SessionId.d.IP1.IP2.IP3.IP4-Port.x.Domain
+decode({domain, {_Type, [Sum, _Nonce, "id", SessionId, "d",
+                IP1, IP2, IP3, IP4, Port, "x"|Domain]}},
+        #state{d = Domains, acf = true, acl = ACL}) ->
+    true = check_dn(Domain, Domains),
+    true = check_acl({IP1,IP2,IP3,IP4}, ACL),
+
+    Forward = forward({{IP1,IP2,IP3,IP4},Port}),
+
+    #seds{
+        type = down,
+        forward = Forward,
+        id = SessionId,
+        sum = list_to_sum(Sum),
+        domain = Domain
+    };
+decode({domain, {_Type, [Sum, _Nonce, "id", SessionId, "d",
+                IP1, IP2, IP3, IP4, "x"|Domain]}}, 
+        #state{d = Domains, acf = true, acl = ACL}) ->
+    true = check_dn(Domain, Domains),
+    true = check_acl({IP1,IP2,IP3,IP4}, ACL),
+
+    Forward = forward({{IP1,IP2,IP3,IP4}, 22}),
+
+    #seds{
+        type = down,
+        forward = Forward,
+        id = SessionId,
+        sum = list_to_sum(Sum),
+        domain = Domain
+    };
+
 % 0-29941.id-10498.down.s.p.example.com
 % Sum-Nonce.id-SessionId.down.Domain
-decode({domain, {_Type, [Sum, _Nonce, "id", SessionId, "down"|Domain]}}, Domains) ->
+decode({domain, {_Type, [Sum, _Nonce, "id", SessionId, "down"|Domain]}},
+    #state{d = Domains}) ->
     true = check_dn(Domain, Domains),
 
     {Forward, Id} = forward(list_to_integer(SessionId)),
@@ -204,7 +284,7 @@ decode({domain, {_Type, [Sum, _Nonce, "id", SessionId, "down"|Domain]}}, Domains
         type = down,
         forward = Forward,
         id = Id,
-        sum = list_to_integer(lists:reverse(tl(lists:reverse(Sum)))),
+        sum = list_to_sum(Sum),
         domain = Domain
     };
 
@@ -219,15 +299,15 @@ decode({dns_rec, #dns_rec{
                     class = in
                 }|_]
         }
-    }, Domains) ->
+    }, State) ->
     {Prefix, Session} = lists:split(string:chr(Query, $-), Query),
-    decode({domain, {Type, [Prefix|string:tokens(Session, ".-")]}}, Domains);
+    decode({domain, {Type, [Prefix|string:tokens(Session, ".-")]}}, State);
 
-decode({binary, Data}, Domains) ->
+decode({binary, Data}, State) ->
     {ok, Query} = inet_dns:decode(Data),
-    {Query, decode({dns_rec, Query}, Domains)};
-decode(Data, Domains) ->
-    try decode({binary, Data}, Domains) of
+    {Query, decode({dns_rec, Query}, State)};
+decode(Data, State) ->
+    try decode({binary, Data}, State) of
         Query ->
             Query
     catch
@@ -242,6 +322,13 @@ decode(Data, Domains) ->
 % Respond only to the configured list of domains
 check_dn(Domain, Domains) ->
     [ N || N <- Domains, lists:suffix(N, Domain) ] /= [].
+
+check_acl({IP1,IP2,IP3,IP4}, ACL) ->
+    [ N || N <- ACL, lists:prefix(N, [IP1,IP2,IP3,IP4]) ] == [].
+
+% Remove the trailing dash and convert to an integer
+list_to_sum(N) when is_list(N) ->
+    list_to_integer(lists:reverse(tl(lists:reverse(N)))).
 
 config(Key, Cfg) ->
     {ok, Map} = file:consult(privpath(Cfg)),
