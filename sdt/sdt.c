@@ -463,6 +463,7 @@ usage(SDT_STATE *ss)
     (void)fprintf(stderr, "-R <number>\tNumber of retries for lookup\n");
     (void)fprintf(stderr, "-r\tNameserver (or keyword: random, opendns, verizon, speakeasy, google)\n");
     (void)fprintf(stderr, "-S [rotate|blast]\tResolver strategy\n");
+    (void)fprintf(stderr, "-s <number>\tForward session\n");
     (void)fprintf(stderr, "-T <number>\tUse TCP [0 = new connection for each request, 1 = pipeline requests]\n");
     (void)fprintf(stderr, "-t <DNS type>\tTXT, CNAME, NULL [Default = TXT]\n");
     (void)fprintf(stderr, "-V <num>\tNumber of debug messages\n");
