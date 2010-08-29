@@ -181,7 +181,7 @@ map(#state{
         f = Fwd,
         d = Domains
     }) ->
-    #map{
+    #config{
         acf = ACF,
         acl = ACL,
         acl_port = ACP,
