@@ -40,7 +40,7 @@ session(#seds{
         forward = {session, Forward},
         id = Id
     },
-    #map{f = Map}) ->
+    #config{f = Map}) ->
     F = case Forward + 1 of
         N when N > length(Map) -> 1;
         N when N < 1 -> 1;
@@ -50,7 +50,7 @@ session(#seds{
 session(#seds{
         forward = {forward, Forward},
         id = Id
-    }, #map{}) ->
+    }, #config{}) ->
     {Forward, Id}.
 
 forward({_IP, _Port} = Forward) ->
@@ -64,7 +64,7 @@ forward(Id) when is_integer(Id) ->
 % B64._Nonce-Sum.id-SessionId.u.IP1.IP2.IP3.IP4-Port.x.Domain
 decode({domain, {a, [Base64Nonce, Sum, "id", SessionId, "u",
                 IP1, IP2, IP3, IP4, Port, "x"|Domain]}},
-    #map{d = Domains, acf = true, acl = ACL, acl_port = ACP}) ->
+    #config{d = Domains, acf = true, acl = ACL, acl_port = ACP}) ->
 
     IP = makeaddr({IP1,IP2,IP3,IP4}),
     Port1 = list_to_integer(Port),
@@ -86,7 +86,7 @@ decode({domain, {a, [Base64Nonce, Sum, "id", SessionId, "u",
     };
 decode({domain, {a, [Base64Nonce, Sum, "id", SessionId, "u",
                 IP1, IP2, IP3, IP4, "x"|Domain]}},
-    #map{d = Domains, acf = true, acl = ACL}) ->
+    #config{d = Domains, acf = true, acl = ACL}) ->
 
     IP = makeaddr({IP1,IP2,IP3,IP4}),
 
@@ -108,7 +108,7 @@ decode({domain, {a, [Base64Nonce, Sum, "id", SessionId, "u",
 % mfz.wiztb.onsgmcq.40966-0.id-372571.up.p.example.com
 % B64._Nonce-Sum.id-SessionId.up.Domain
 decode({domain, {a, [Base64Nonce, Sum, "id", SessionId, "up"|Domain]}},
-    #map{d = Domains}) ->
+    #config{d = Domains}) ->
     true = check_dn(Domain, Domains),
 
     B64 = string:tokens(Base64Nonce, "."),
@@ -130,7 +130,7 @@ decode({domain, {a, [Base64Nonce, Sum, "id", SessionId, "up"|Domain]}},
 % Sum-Nonce.id-SessionId.d.IP1.IP2.IP3.IP4-Port.x.Domain
 decode({domain, {_Type, [Sum, _Nonce, "id", SessionId, "d",
                 IP1, IP2, IP3, IP4, Port, "x"|Domain]}},
-        #map{d = Domains, acf = true, acl = ACL, acl_port = ACP}) ->
+        #config{d = Domains, acf = true, acl = ACL, acl_port = ACP}) ->
 
     IP = makeaddr({IP1,IP2,IP3,IP4}),
     Port1 = list_to_integer(Port),
@@ -150,7 +150,7 @@ decode({domain, {_Type, [Sum, _Nonce, "id", SessionId, "d",
     };
 decode({domain, {_Type, [Sum, _Nonce, "id", SessionId, "d",
                 IP1, IP2, IP3, IP4, "x"|Domain]}}, 
-        #map{d = Domains, acf = true, acl = ACL}) ->
+        #config{d = Domains, acf = true, acl = ACL}) ->
 
     IP = makeaddr({IP1,IP2,IP3,IP4}),
 
@@ -170,7 +170,7 @@ decode({domain, {_Type, [Sum, _Nonce, "id", SessionId, "d",
 % 0-29941.id-10498.down.s.p.example.com
 % Sum-Nonce.id-SessionId.down.Domain
 decode({domain, {_Type, [Sum, _Nonce, "id", SessionId, "down"|Domain]}},
-    #map{d = Domains}) ->
+    #config{d = Domains}) ->
     true = check_dn(Domain, Domains),
 
     {Forward, Id} = forward(list_to_integer(SessionId)),
