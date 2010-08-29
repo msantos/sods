@@ -57,13 +57,15 @@ main(int argc, char *argv[])
     ss->maxpollfail = MAXPOLLFAIL;
     ss->type = ns_t_txt;
     ss->verbose_lines = 100;
+    ss->protocol = PROTO_STATIC_FWD;
+    ss->target_port = 22;
 
     ss->dname_next = &sdt_dns_dn_roundrobin;
 
     ss->fd_in = fileno(stdin);
     ss->fd_out = fileno(stdout);
 
-    while ( (ch = getopt(argc, argv, "A:B:b:dF:hM:m:n:p:R:r:S:s:T:t:V:vx:")) != -1) {
+    while ( (ch = getopt(argc, argv, "A:B:b:D:dF:hM:m:n:p:R:r:S:s:T:t:V:vx:")) != -1) {
         switch (ch) {
             case 'A':	/* alarm, delay buf */
                 ss->delay = (u_int32_t)atoi(optarg);
@@ -73,6 +75,14 @@ main(int argc, char *argv[])
                 break;
             case 'b':   /* max backoff */
                 ss->maxbackoff = (u_int16_t)atoi(optarg);
+                break;
+            case 'D': { /* Dynamic forward */
+                char *hostname = NULL;
+
+                IS_NULL(hostname = strdup(optarg));
+                sdt_parse_forward(ss, hostname);
+                free(hostname);
+                }
                 break;
             case 'd':   /* Debug DNS */
                 sdt_dns_setopt(SDT_RES_DEBUG, 1);
@@ -202,6 +212,27 @@ main(int argc, char *argv[])
     IS_ERR(close(nd));
 
     exit(EXIT_SUCCESS);
+}
+
+
+    void
+sdt_parse_forward(SDT_STATE *ss, char *host)
+{
+    struct hostent *he = NULL;
+    struct in_addr in = {0};
+    char *port = NULL;
+
+    if ( (port = strchr(host, ':')) != NULL) {
+        *port++ = '\0';
+        ss->target_port = atoi(port);
+    }
+
+    if ( (he = gethostbyname(host)) == NULL)
+        errx(EXIT_FAILURE, "gethostbyname: %s", hstrerror(h_errno));
+
+    (void)memcpy(&in, he->h_addr, sizeof(in));
+    IS_NULL(ss->target = strdup(inet_ntoa(in)));
+    ss->protocol = PROTO_DYN_FWD;
 }
 
 
@@ -455,6 +486,7 @@ usage(SDT_STATE *ss)
     (void)fprintf(stderr, "-A\tDelay A queries to force full buffer reads [default: %d microseconds]\n", ss->delay);
     (void)fprintf(stderr, "-B\tSize of read buffer (A queries) [default: %d bytes]\n", (u_int32_t)ss->bufsz);
     (void)fprintf(stderr, "-b\tMaximum backoff for polling server [default: %d]\n", ss->maxbackoff);
+    (void)fprintf(stderr, "-D\tDynamically forward a session\n");
     (void)fprintf(stderr, "-F <num>\tFast start, number of small packets to pass w/out buffering (0 to disable) [default: %d]\n", ss->faststart);
     (void)fprintf(stderr, "-M\tMaximum number of polling query failures [default: %d]\n", ss->maxpollfail);
     (void)fprintf(stderr, "-m\tMinimum time to sleep between nameserver queries [default: %d us]\n", ss->sleep);

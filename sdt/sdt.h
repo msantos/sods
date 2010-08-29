@@ -27,8 +27,13 @@
 
 #include <netinet/in.h>
 #include <sys/socket.h>
+#include <arpa/inet.h>
 
-#define SDT_VERSION     "0.8"
+#include <netdb.h>
+extern int h_errno;
+
+
+#define SDT_VERSION     "0.9"
 
 #ifdef HAVE_ERRX
 #include <err.h>
@@ -133,12 +138,23 @@ typedef struct _SDT_STATE {
     int         verbose;
     int         verbose_lines;
 
-    u_int16_t   proxy_port;
+    in_port_t   proxy_port;
     int         fd_in;
     int         fd_out;
 
+    int         protocol;
+    char        *target;
+    in_port_t   target_port;
+
     char *(*dname_next)(void *state);
 } SDT_STATE;
+
+/* Protocol version */
+enum {
+    PROTO_OZYMANDNS,
+    PROTO_STATIC_FWD,
+    PROTO_DYN_FWD
+};
 
 /* Resolver options */
 enum {
@@ -150,6 +166,7 @@ enum {
     SDT_RES_DEBUG,          /* Enable resolver debugging */
 };
 
+void sdt_parse_forward(SDT_STATE *ss, char *host);
 int sdt_proxy_open(SDT_STATE *ss);
 void sdt_loop_poll(SDT_STATE *ss);
 void sdt_loop_A(SDT_STATE *ss);

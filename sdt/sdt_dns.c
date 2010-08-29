@@ -132,11 +132,19 @@ sdt_dns_A(SDT_STATE *ss, char *buf, ssize_t n)
     }
     (void)memcpy(dn, query, sizeof(dn));
 
-    /* Create the domain name:
-     *  $temp_payload.$nonce-$sum_up.id-$id.up.$extension
-     */
-    (void)snprintf(query, sizeof(query), "%s.%u-%u.id-%u.up.%s",
-            dn, nonce, (u_int32_t)ss->sum_up, htonl(ss->sess.id), ss->dname_next(ss));
+    switch (ss->protocol) {
+        case PROTO_DYN_FWD:
+            (void)snprintf(query, sizeof(query), "%s.%u-%u.id-%u.u.%s-%u.x.%s",
+                    dn, nonce, (u_int32_t)ss->sum_up, htonl(ss->sess.id), ss->target, ss->target_port, ss->dname_next(ss));
+            break;
+        default:
+            /* Create the domain name:
+             *  $temp_payload.$nonce-$sum_up.id-$id.up.$extension
+             */
+            (void)snprintf(query, sizeof(query), "%s.%u-%u.id-%u.up.%s",
+                    dn, nonce, (u_int32_t)ss->sum_up, htonl(ss->sess.id), ss->dname_next(ss));
+            break;
+    }
 
     VERBOSE(2, "A:%s\n", query);
     if (res_search(query, ns_c_in, ns_t_a, (u_char *)&pkt, sizeof(pkt)) < 0) {
@@ -162,11 +170,19 @@ sdt_dns_poll(SDT_STATE *ss, size_t *len)
 
     nonce = (u_int16_t)arc4random();
 
-    /* Create the TXT query:
-     *  $sum-$nonce.id-$id.down.$extension
-     */
-    (void)snprintf(query, sizeof(query), "%u-%u.id-%u.down.%s",
-            (u_int32_t)ss->sum, nonce, htonl(ss->sess.id), ss->dname_next(ss));
+    switch (ss->protocol) {
+        case PROTO_DYN_FWD:
+            (void)snprintf(query, sizeof(query), "%u-%u.id-%u.d.%s-%u.x.%s",
+                    (u_int32_t)ss->sum, nonce, htonl(ss->sess.id), ss->target, ss->target_port, ss->dname_next(ss));
+            break;
+        default:
+            /* Create the TXT query:
+             *  $sum-$nonce.id-$id.down.$extension
+             */
+            (void)snprintf(query, sizeof(query), "%u-%u.id-%u.down.%s",
+                    (u_int32_t)ss->sum, nonce, htonl(ss->sess.id), ss->dname_next(ss));
+            break;
+    }
 
     VERBOSE(2, "POLL:%s\n", query);
 
