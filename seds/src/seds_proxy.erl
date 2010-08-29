@@ -35,6 +35,8 @@
 -include("seds.hrl").
 
 -record(state, {
+        ip,
+        port,
         dnsfd,          % dns server socket
         s,              % proxied socket
 
@@ -50,7 +52,7 @@
 -export([start_link/2]).
 -export([label/1]).
 % States
--export([proxy/2]).
+-export([connect/2,proxy/2]).
 % Behaviours
 -export([init/1, handle_event/3, handle_sync_event/4,
         handle_info/3, terminate/3, code_change/4]).
@@ -77,19 +79,11 @@ start_link(Socket, {ServerIP, ServerPort}) ->
 
 init([DNSSocket, {ServerIP, ServerPort}]) ->
     process_flag(trap_exit, true),
-    {ok, Socket} = gen_tcp:connect(ServerIP, ServerPort, [
-            binary,
-            {packet, 0},
-            {active, once}
-        ]),
-    error_logger:info_report([
-            {proxy_forward, {ServerIP, ServerPort}},
-            {socket, Socket}
-        ]),
-    {ok, proxy, #state{
+    {ok, connect, #state{
             dnsfd = DNSSocket,
-            s = Socket
-        }}.
+            ip = ServerIP,
+            port = ServerPort
+        }, 0}.
 
 
 handle_event(_Event, StateName, State) ->
@@ -123,6 +117,18 @@ code_change(_OldVsn, StateName, State, _Extra) ->
 %%--------------------------------------------------------------------
 %%% States
 %%--------------------------------------------------------------------
+connect(timeout, #state{ip = IP, port = Port} = State) ->
+    {ok, Socket} = gen_tcp:connect(IP, Port, [
+            binary,
+            {packet, 0},
+            {active, once}
+        ], 5000),
+    error_logger:info_report([
+            {proxy_forward, {IP, Port}},
+            {socket, Socket}
+        ]),
+    {next_state, proxy, State#state{s = Socket}}.
+
 proxy({dns_query, IP, Port, #dns_rec{
             header = Header,
             qdlist = [#dns_query{
