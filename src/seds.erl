@@ -90,7 +90,7 @@ init([Port]) ->
 handle_call({send, {IP, Port, #dns_rec{} = Rec, #seds{} = Query}}, _From, #state{
         s = Socket
     } = State) ->
-    Session = seds_decode:session(Query, map(State)),
+    Session = seds_protocol:session(Query, map(State)),
     {Proxy, Proxies} = proxy(Socket, Session, State),
     ok = seds_proxy:send(Proxy, IP, Port, Rec, {Query#seds.type, Query#seds.data}),
     {reply, ok, State#state{p = Proxies}};
@@ -107,7 +107,7 @@ handle_info({udp, Socket, IP, Port, Data}, #state{
         s = Socket
     } = State) ->
     ok = inet:setopts(Socket, [{active, once}]),
-    spawn(seds_decode, decode, [{IP, Port, Data}, map(State)]),
+    spawn(seds_protocol, decode, [{IP, Port, Data}, map(State)]),
     {noreply, State};
 
 % Session terminated
