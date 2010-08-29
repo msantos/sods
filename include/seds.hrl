@@ -36,3 +36,20 @@
 
 -define(MAXLABEL, 63).  % 1 byte for length of label
 
+-record(seds, {
+        q,                              % decoded DNS query
+        type,                           % 'up' or 'down'
+        id = 0,                         % 2 or 4 byte session ID
+        forward,                        % tuple describing destination ip/port
+        sum = 0,                        % byte count
+        domain = [],                    % domain names
+        data = []                       % base64 encoded data
+    }).
+
+-record(map, {
+        acf = false,                    % allow client forwarding
+        acl = [],                       % forward IP blacklist
+        f,                              % forwarders map
+        d = []                          % domains
+    }).
+
