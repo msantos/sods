@@ -64,15 +64,17 @@ forward(Id) when is_integer(Id) ->
 % B64._Nonce-Sum.id-SessionId.u.IP1.IP2.IP3.IP4-Port.x.Domain
 decode({domain, {a, [Base64Nonce, Sum, "id", SessionId, "u",
                 IP1, IP2, IP3, IP4, Port, "x"|Domain]}},
-    #map{d = Domains, acf = true, acl = ACL}) ->
+    #map{d = Domains, acf = true, acl = ACL, acl_port = ACP}) ->
 
     IP = makeaddr({IP1,IP2,IP3,IP4}),
+    Port1 = list_to_integer(Port),
 
     true = check_dn(Domain, Domains),
     true = check_acl(IP, ACL),
+    true = check_port(Port1, ACP),
 
     B64 = string:tokens(Base64Nonce, "."),
-    Forward = forward({IP, list_to_integer(Port)}),
+    Forward = forward({IP, Port1}),
 
     #seds{
         type = up,
@@ -128,14 +130,16 @@ decode({domain, {a, [Base64Nonce, Sum, "id", SessionId, "up"|Domain]}},
 % Sum-Nonce.id-SessionId.d.IP1.IP2.IP3.IP4-Port.x.Domain
 decode({domain, {_Type, [Sum, _Nonce, "id", SessionId, "d",
                 IP1, IP2, IP3, IP4, Port, "x"|Domain]}},
-        #map{d = Domains, acf = true, acl = ACL}) ->
+        #map{d = Domains, acf = true, acl = ACL, acl_port = ACP}) ->
 
     IP = makeaddr({IP1,IP2,IP3,IP4}),
+    Port1 = list_to_integer(Port),
 
     true = check_dn(Domain, Domains),
     true = check_acl(IP, ACL),
+    true = check_port(Port1, ACP),
 
-    Forward = forward({IP, list_to_integer(Port)}),
+    Forward = forward({IP, Port1}),
 
     #seds{
         type = down,
@@ -207,6 +211,9 @@ check_dn(Domain, Domains) ->
 
 check_acl({IP1,IP2,IP3,IP4}, ACL) ->
     [ N || N <- ACL, lists:prefix(N, [IP1,IP2,IP3,IP4]) ] == [].
+
+check_port(Port, Allowed) ->
+    lists:member(Port, Allowed).
 
 % Remove the trailing dash and convert to an integer
 list_to_sum(N) when is_list(N) ->

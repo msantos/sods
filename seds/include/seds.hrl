@@ -49,6 +49,7 @@
 -record(map, {
         acf = false,                    % allow client forwarding
         acl = [],                       % forward IP blacklist
+        acl_port = [22],                % forward IP blacklist
         f,                              % forwarders map
         d = []                          % domains
     }).

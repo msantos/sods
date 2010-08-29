@@ -44,6 +44,7 @@
 -record(state, {
         acf = false,                    % allow client forwarding
         acl = [],                       % forward IP blacklist
+        acl_port = [],                 % allowed ports (whitelist)
 
         f,                              % forwarders map
         s,                              % socket
@@ -80,6 +81,7 @@ init([Port]) ->
     {ok, #state{
             acf = config(dynamic, ?CFG, false),
             acl = config(acl, ?CFG, []),
+            acl_port = config(allowed_ports, ?CFG, [22]),
             f = config(forward, ?CFG, []),
             d = [ string:tokens(N, ".") || N <- config(domains, ?CFG) ],
             s = Socket,
@@ -175,12 +177,14 @@ privpath(Cfg) ->
 map(#state{
         acf = ACF,
         acl = ACL,
+        acl_port = ACP,
         f = Fwd,
         d = Domains
     }) ->
     #map{
         acf = ACF,
         acl = ACL,
+        acl_port = ACP,
         f = Fwd,
         d = Domains
     }.
