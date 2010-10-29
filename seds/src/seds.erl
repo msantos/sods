@@ -85,7 +85,7 @@ init([Port]) ->
             f = config(forward, ?CFG, []),
             d = [ string:tokens(N, ".") || N <- config(domains, ?CFG) ],
             s = Socket,
-            p = orddict:new()
+            p = dict:new()
         }}.
 
 
@@ -117,7 +117,7 @@ handle_info({'DOWN', _Ref, process, Pid, _Reason}, #state{
         p = Proxies
     } = State) ->
     {noreply, State#state{
-            p = orddict:filter(
+            p = dict:filter(
                 fun (_,V) when V == Pid -> false;
                     (_,_) -> true
                 end,
@@ -141,7 +141,7 @@ code_change(_OldVsn, State, _Extra) ->
 proxy(Socket, {{ServerIP, ServerPort}, SessionId} = Session, #state{
         p = Proxies
     }) ->
-    case orddict:find(Session, Proxies) of
+    case dict:find(Session, Proxies) of
         error ->
             error_logger:info_report([
                     {proxy, starting},
@@ -155,7 +155,7 @@ proxy(Socket, {{ServerIP, ServerPort}, SessionId} = Session, #state{
                 Socket,
                 {ServerIP, ServerPort}
             ),
-            {Pid, orddict:store(Session, Pid, Proxies)};
+            {Pid, dict:store(Session, Pid, Proxies)};
         {ok, Pid} ->
             {Pid, Proxies}
     end.
