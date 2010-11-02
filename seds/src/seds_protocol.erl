@@ -217,5 +217,4 @@ check_port(Port, Allowed) ->
 
 % Remove the trailing dash and convert to an integer
 list_to_sum(N) when is_list(N) ->
-    list_to_integer(lists:reverse(tl(lists:reverse(N)))).
-
+    list_to_integer(string:strip(N, right, $-)).
