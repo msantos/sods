@@ -88,12 +88,12 @@ init(Port, Opt) ->
         }}.
 
 
-handle_call({send, {IP, Port, #dns_rec{} = Rec, #seds{} = Query}}, _From, #state{
-        s = Socket
-    } = State) ->
+handle_call({send, {IP, Port, #dns_rec{} = Rec,
+            #seds{type = Type, data = Data} = Query}}, _From,
+            State) ->
     Session = seds_protocol:session(Query, map(State)),
-    {Proxy, Proxies} = proxy(Socket, Session, State),
-    ok = seds_proxy:send(Proxy, IP, Port, Rec, {Query#seds.type, Query#seds.data}),
+    {Proxy, Proxies} = proxy(Session, State),
+    ok = seds_proxy:send(Proxy, IP, Port, Rec, {Type, Data}),
     {reply, ok, State#state{p = Proxies}};
 
 handle_call(Request, _From, State) ->
@@ -137,7 +137,8 @@ code_change(_OldVsn, State, _Extra) ->
 %%%
 %%% Internal Functions
 %%%
-proxy(Socket, {{ServerIP, ServerPort}, SessionId} = Session, #state{
+proxy({{ServerIP, ServerPort}, SessionId} = Session, #state{
+        s = Socket,
         p = Proxies
     }) ->
     case dict:find(Session, Proxies) of
