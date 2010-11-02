@@ -44,7 +44,7 @@
 -record(state, {
         acf = false,                    % allow client forwarding
         acl = [],                       % forward IP blacklist
-        acl_port = [],                 % allowed ports (whitelist)
+        acl_port = [],                  % allowed ports (whitelist)
 
         f,                              % forwarders map
         s,                              % socket
