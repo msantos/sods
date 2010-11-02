@@ -62,18 +62,17 @@ start_link() ->
 start_link(Port) ->
     gen_server:start_link({local, ?SERVER}, ?MODULE, [Port], []).
 
+init([Port]) when Port > 1024 ->
+    init(Port, []);
 init([Port]) ->
-    Opt = case Port of
-        N when N > 1024 ->
-            [];
-        _ ->
-            {ok, FD} = procket:listen(Port, [
-                    {protocol, udp},
-                    {family, inet},
-                    {type, dgram}
-                ]),
-            [{fd, FD}]
-    end,
+    {ok, FD} = procket:listen(Port, [
+        {protocol, udp},
+        {family, inet},
+        {type, dgram}
+    ]),
+    init(Port, [{fd, FD}]).
+
+init(Port, Opt) ->
     {ok, Socket} = gen_udp:open(Port, [
             binary,
             {active, once}
