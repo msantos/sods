@@ -129,13 +129,15 @@ connect(timeout, #state{ip = IP, port = Port} = State) ->
         ]),
     {next_state, proxy, State#state{s = Socket}}.
 
-proxy({dns_query, IP, Port, #dns_rec{
+proxy({dns_query, IP, Port,
+        #dns_rec{
             header = Header,
             qdlist = [#dns_query{
                     domain = Domain,
                     type = Type
                 }|_]
-        } = Rec, Data}, #state{
+        } = Rec, Data},
+    #state{
         sum = Sum,
         dnsfd = DNSSocket,
         s = Socket
@@ -188,15 +190,15 @@ proxy({dns_query, IP, Port, #dns_rec{
     {Payload, Rest} = data(Type, Data),
 
     Response = Rec#dns_rec{
-            header = Header#dns_header{
-                qr = true,
-                ra = true
-            },
-            anlist = [#dns_rr{
-                    domain = Domain,
-                    type = Type,
-                    data = Payload
-                }]},
+        header = Header#dns_header{
+            qr = true,
+            ra = true
+        },
+        anlist = [#dns_rr{
+                domain = Domain,
+                type = Type,
+                data = Payload
+            }]},
 
     Packet = inet_dns:encode(Response),
 
@@ -231,39 +233,27 @@ data(Type, Data) when is_list(Data) ->
     data(Type, list_to_binary(lists:reverse(Data)));
 
 % TXT records
+data(txt, <<D1:?MAXDATA/bytes, D2:?MAXDATA/bytes, Rest/binary>>) ->
+    {[base64:encode_to_string(D1), base64:encode_to_string(D2)], Rest};
+data(txt, <<D1:?MAXDATA/bytes, Rest/binary>>) ->
+    {[base64:encode_to_string(D1)], Rest};
 data(txt, Data) ->
-    case byte_size(Data) of
-        N when N > ?MAXDATA * 2 ->
-            <<D1:?MAXDATA/bytes, D2:?MAXDATA/bytes, Rest/binary>> = Data,
-            {[base64:encode_to_string(D1), base64:encode_to_string(D2)], Rest};
-        N when N > ?MAXDATA ->
-            <<D1:?MAXDATA/bytes, Rest/binary>> = Data,
-            {[base64:encode_to_string(D1)], Rest};
-        _ ->
-            {[base64:encode_to_string(Data)], <<>>}
-    end;
+    {[base64:encode_to_string(Data)], <<>>};
 
 % NULL records
+data(null, <<D1:(?MAXDATA*2)/bytes, Rest/binary>>) ->
+    {base64:encode(D1), Rest};
 data(null, Data) ->
-    case byte_size(Data) of
-        N when N > ?MAXDATA * 2 ->
-            <<D1:(?MAXDATA*2)/bytes, Rest/binary>> = Data,
-            {base64:encode(D1), Rest};
-        _ ->
-            {base64:encode(Data), <<>>}
-    end;
+    {base64:encode(Data), <<>>};
 
 % CNAME records
+data(cname, <<D1:?MAXDATA/bytes, Rest/binary>>) ->
+    {label(base32:encode(D1)), Rest};
 data(cname, Data) ->
-    case byte_size(Data) of
-        N when N > ?MAXDATA ->
-            <<D1:?MAXDATA/bytes, Rest/binary>> = Data,
-            {label(base32:encode(D1)), Rest};
-        _ ->
-            {label(base32:encode(Data)), <<>>}
-    end.
+    {label(base32:encode(Data)), <<>>}.
 
-label(String) when length(String) < ?MAXLABEL ->
+
+label(String) when byte_size(String) < ?MAXLABEL ->
     String;
 label(String) ->
     re:replace(String, ".{63}", "&.", [global, {return, list}]).
