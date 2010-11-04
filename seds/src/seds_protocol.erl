@@ -36,6 +36,16 @@
 -export([decode/2, session/2]).
 
 
+%%%
+%%% Handle decoding of the data embedded in the different
+%%% record types.
+%%%
+
+%%--------------------------------------------------------------------
+%%% Sessions: which IP:Port to send the data
+%%--------------------------------------------------------------------
+
+% Static list of forwarded hosts:port, identified from offset 0
 session(#seds{
         forward = {session, Forward},
         id = Id
@@ -47,18 +57,23 @@ session(#seds{
         N -> N
     end,
     {lists:nth(F, Map), Id};
+
+% Dynamic forwaring requested by client
 session(#seds{
         forward = {forward, Forward},
         id = Id
     }, #config{}) ->
     {Forward, Id}.
 
-forward({_IP, _Port} = Forward) ->
-    {forward, Forward};
-forward(Id) when is_integer(Id) ->
-    <<_Opt:8, Forward:8, SessionId:16>> = <<Id:32>>,
-    {{session, Forward}, SessionId}.
 
+%%--------------------------------------------------------------------
+%%% Decode the data embedded in the DNS record.
+%%%
+%%% The decode function is spawned as an unlinked process. If the
+%%% parsing succeeds, the data is returned to the gen_server. If
+%%% the parsing fails, the data is bad and is thrown away.
+%%% 
+%%--------------------------------------------------------------------
 
 % mfz.wiztb.onsgmcq.40966-0.id-372571.u.192.168.100.101-2222.x.example.com
 % B64._Nonce-Sum.id-SessionId.u.IP1.IP2.IP3.IP4-Port.x.Domain
@@ -202,6 +217,10 @@ decode({IP, Port, Data}, State) ->
     {ok, Query} = inet_dns:decode(Data),
     seds:send({IP, Port, Query}, decode({dns_rec, Query}, State)).
 
+
+%%--------------------------------------------------------------------
+%%% Internal functions
+%%--------------------------------------------------------------------
 makeaddr({IP1,IP2,IP3,IP4}) when is_list(IP1), is_list(IP2), is_list(IP3), is_list(IP4) ->
     {list_to_integer(IP1), list_to_integer(IP2), list_to_integer(IP3), list_to_integer(IP4)}.
 
@@ -218,3 +237,9 @@ check_port(Port, Allowed) ->
 % Remove the trailing dash and convert to an integer
 list_to_sum(N) when is_list(N) ->
     list_to_integer(string:strip(N, right, $-)).
+
+forward({_IP, _Port} = Forward) ->
+    {forward, Forward};
+forward(Id) when is_integer(Id) ->
+    <<_Opt:8, Forward:8, SessionId:16>> = <<Id:32>>,
+    {{session, Forward}, SessionId}.
