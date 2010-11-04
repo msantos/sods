@@ -1,0 +1,39 @@
+#!/bin/sh
+
+OS=`uname -s`
+
+case $OS in
+    'Linux')
+        DEF="-DHAVE_SEND"
+        LIB="-lresolv"
+    ;;
+    'Darwin'|'NetBSD')
+        DEF="-DHAVE_SETSOCKOPT -Wno-deprecated-declarations"
+        LIB="-lresolv"
+    ;;
+    'SunOS')
+        LIB="-lresolv"
+    ;;
+    *)
+        echo "Guessing, adjust Makefile by hand ..."
+        LIB="-lresolv"
+    ;;
+
+esac
+
+cat<<EOF>Makefile
+CC=gcc
+RM=rm
+APP=sods
+
+DEF=${DEF}
+LIB=${LIB}
+
+all:
+	\$(CC) \$(DEF) \$(LIB) -g -Wall -o sods sods.c sods_handler.c sods_dns.c sods_io.c \
+		sods_q.c sods_sock.c sods_priv.c base32.c base64.c
+
+clean:
+	-@\$(RM) sods *.o
+
+EOF

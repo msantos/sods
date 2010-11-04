@@ -1,0 +1,40 @@
+#!/bin/sh
+
+OS=`uname -s`
+
+case $OS in
+    'Linux')
+        STATIC_LIB=/usr/lib/libresolv.a
+        LIB=-lcrypto
+        DEF="-DHAVE_ERR -DHAVE_SSL"
+    ;;
+    'Darwin'|'NetBSD')
+        DEF="-DHAVE_ARC4RANDOM -DHAVE_ERR"
+        LIB="-lresolv"
+    ;;
+    'SunOS')
+        LIB="-lresolv"
+    ;;
+    *)
+        echo "Guessing, adjust Makefile by hand ..."
+        LIB="-lresolv"
+    ;;
+
+esac
+
+cat<<EOF>Makefile
+CC=gcc
+RM=rm
+APP=sdt
+
+STATIC_LIB=${STATIC_LIB}
+DEF=${DEF}
+LIB=${LIB}
+
+all:
+	\$(CC) \$(DEF) -g -Wall \$(LIB) -o \$(APP) \$(APP).c \$(APP)_dns.c \$(APP)_err.c \$(APP)_rand.c base32.c base64.c \$(STATIC_LIB)
+
+clean:
+	-@\$(RM) *.o \$(APP)
+EOF
+
