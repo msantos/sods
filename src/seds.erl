@@ -89,11 +89,11 @@ init(Port, Opt) ->
 
 
 handle_call({send, {IP, Port, #dns_rec{} = Rec,
-            #seds{type = Type, data = Data} = Query}}, _From,
-            State) ->
+            #seds{type = Type, sum = Sum, data = Data} = Query}},
+            _From, State) ->
     Session = seds_protocol:session(Query, map(State)),
     {Proxy, Proxies} = proxy(Session, State),
-    ok = seds_proxy:send(Proxy, IP, Port, Rec, {Type, Data}),
+    ok = seds_proxy:send(Proxy, IP, Port, Rec, {Type, Sum, Data}),
     {reply, ok, State#state{p = Proxies}};
 
 handle_call(Request, _From, State) ->

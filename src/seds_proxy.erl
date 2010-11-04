@@ -42,6 +42,7 @@
 
         sum_up = 0,     % number of bytes sent to server
         sum_down = 0,   % number of bytes received from server
+        buf = [],       % last packet sent (for resend)
         data = [<<>>]   % list of binaries: data returned by proxied server
     }).
 
@@ -62,10 +63,10 @@
 %%--------------------------------------------------------------------
 %%% Interface
 %%--------------------------------------------------------------------
-send(Pid, IP, Port, #dns_rec{} = Query, {up, Data}) when is_pid(Pid) ->
-    gen_fsm:send_event(Pid, {up, IP, Port, Query, Data});
-send(Pid, IP, Port, #dns_rec{} = Query, {down, _}) when is_pid(Pid) ->
-    gen_fsm:send_event(Pid, {down, IP, Port, Query}).
+send(Pid, IP, Port, #dns_rec{} = Query, {up, Sum, Data}) when is_pid(Pid) ->
+    gen_fsm:send_event(Pid, {up, IP, Port, Query, Sum, Data});
+send(Pid, IP, Port, #dns_rec{} = Query, {down, Sum, _}) when is_pid(Pid) ->
+    gen_fsm:send_event(Pid, {down, IP, Port, Query, Sum}).
 
 %%--------------------------------------------------------------------
 %%% Behaviours
@@ -148,14 +149,7 @@ connect(timeout, #state{ip = IP, port = Port} = State) ->
 %%
 
 % client sent data to be forwarded to server
-proxy({up, IP, Port,
-        #dns_rec{
-            header = Header,
-            qdlist = [#dns_query{
-                    domain = Domain,
-                    type = Type
-                }|_]
-        } = Rec, Data},
+proxy({up, IP, Port, Rec, ClientSum, Data},
     #state{
         sum_up = Sum,
         dnsfd = DNSSocket,
@@ -165,75 +159,60 @@ proxy({up, IP, Port,
     Payload = base32:decode(string:to_upper(Data)),
     Sum1 = Sum + length(Payload),
 
-    ok = gen_tcp:send(Socket, Payload),
+    case response(up, ClientSum, Sum, Rec) of
+        error ->
+            {stop, {up, out_of_sync}, State};
+        duplicate ->
+            error_logger:info_report([{dropping, {IP, Port}}]),
+            {next_state, proxy, State, ?PROXY_TIMEOUT};
+        Packet ->
+            error_logger:info_report([
+                {direction, up},
+                {dns_query, Packet}
+            ]),
+            ok = gen_tcp:send(Socket, Payload),
+            ok = gen_udp:send(DNSSocket, IP, Port, Packet),
+            {next_state, proxy, State#state{sum_up = Sum1},
+                ?PROXY_TIMEOUT}
+    end;
 
-    Packet = inet_dns:encode(
-        Rec#dns_rec{
-            header = Header#dns_header{
-                qr = true,
-                ra = true
-            },
-            anlist = [#dns_rr{
-                    domain = Domain,
-                    type = Type,
-                    data = seq(Sum1)
-                }]
-        }),
-
-    error_logger:info_report([
-            {direction, up},
-            {dns_query, Rec}
-        ]),
-
-    ok = gen_udp:send(DNSSocket, IP, Port, Packet),
-    {next_state, proxy, State#state{sum_up = Sum1},
-        ?PROXY_TIMEOUT};
-
-% client requested any pending data from server
+% client requested pending data from server
 proxy({down, IP, Port,
         #dns_rec{
-            header = Header,
             qdlist = [#dns_query{
-                    domain = Domain,
                     type = Type
-                }|_]} = Rec},
+                }|_]} = Rec, ClientSum},
         #state{
             sum_down = Sum,
             dnsfd = DNSSocket,
             s = Socket,
-            data = Data
+            data = Data,
+            buf = Buf
         } = State) ->
 
-    % Client polled, allow more data from server
-    ok = inet:setopts(Socket, [{active, once}]),
+    {Payload, Size, Rest} = data(Type, Data),
 
-    {Payload, Rest} = data(Type, Data),
-    Sum1 = Sum + length(Payload),
+    case response({down, Payload}, ClientSum, Sum, Rec) of
+        error ->
+            {stop, {down, out_of_sync}, State};
+        duplicate ->
+            error_logger:info_report([{resending, {IP, Port, Sum}}]),
+            ok = resend(DNSSocket, IP, Port, Type, Buf, Rec),
+            {next_state, proxy, State#state{sum_down = Sum},
+                ?PROXY_TIMEOUT};
+        Packet ->
+            error_logger:info_report([
+                {direction, down},
+                {dns_query, Rec}
+            ]),
+            ok = inet:setopts(Socket, [{active, once}]),
+            ok = gen_udp:send(DNSSocket, IP, Port, Packet),
+            {next_state, proxy, State#state{
+                sum_down = Sum + Size,
+                data = [Rest],
+                buf = Data}, ?PROXY_TIMEOUT}
+    end;
 
-    Response = Rec#dns_rec{
-        header = Header#dns_header{
-            qr = true,
-            ra = true
-        },
-        anlist = [#dns_rr{
-                domain = Domain,
-                type = Type,
-                data = Payload
-            }]},
-
-    Packet = inet_dns:encode(Response),
-
-    error_logger:info_report([
-            {direction, down},
-            {dns_query, Rec}
-        ]),
-
-    ok = gen_udp:send(DNSSocket, IP, Port, Packet),
-
-    {next_state, proxy, State#state{
-            sum_down = Sum1,
-            data = [Rest]
-        }, ?PROXY_TIMEOUT};
 proxy(timeout, State) ->
     {stop, timeout, State}.
 
@@ -245,35 +224,76 @@ seq(N) when is_integer(N) ->
     {I1,I2,I3,I4}.
 
 
+%% Encode the data returned by the server as a DNS record
 data(_, [<<>>]) ->
-    {[],<<>>};
+    {[],0,<<>>};
 data(Type, Data) when is_list(Data) ->
     data(Type, list_to_binary(lists:reverse(Data)));
 
 % TXT records
 data(txt, <<D1:?MAXDATA/bytes, D2:?MAXDATA/bytes, Rest/binary>>) ->
-    {[base64:encode_to_string(D1), base64:encode_to_string(D2)], Rest};
+    {[base64:encode_to_string(D1), base64:encode_to_string(D2)], 2*?MAXDATA, Rest};
 data(txt, <<D1:?MAXDATA/bytes, Rest/binary>>) ->
-    {[base64:encode_to_string(D1)], Rest};
+    {[base64:encode_to_string(D1)], ?MAXDATA, Rest};
 data(txt, Data) ->
-    {[base64:encode_to_string(Data)], <<>>};
+    {[base64:encode_to_string(Data)], byte_size(Data), <<>>};
 
 % NULL records
 data(null, <<D1:(?MAXDATA*2)/bytes, Rest/binary>>) ->
-    {base64:encode(D1), Rest};
+    {base64:encode(D1), ?MAXDATA*2, Rest};
 data(null, Data) ->
-    {base64:encode(Data), <<>>};
+    {base64:encode(Data), byte_size(Data), <<>>};
 
 % CNAME records
 data(cname, <<D1:?MAXDATA/bytes, Rest/binary>>) ->
-    {label(base32:encode(D1)), Rest};
+    {label(base32:encode(D1)), ?MAXDATA, Rest};
 data(cname, Data) ->
-    {label(base32:encode(Data)), <<>>}.
+    {label(base32:encode(Data)), byte_size(Data), <<>>}.
 
 
+%% Each component (or label) of a CNAME can have a
+%% max length of 63 bytes. A "." divides the labels.
 label(String) when byte_size(String) < ?MAXLABEL ->
     String;
 label(String) ->
     re:replace(String, ".{63}", "&.", [global, {return, list}]).
+
+
+%% Packet sum checks
+response(up, Sum, Sum, Rec) ->
+    encode(seq(Sum), Rec);
+response({down, Payload}, Sum, Sum, Rec) ->
+    encode(Payload, Rec);
+response(_, Sum1, Sum2, _) when Sum1 < Sum2 ->
+    duplicate;
+response(_, Sum1, Sum2, _) when Sum1 > Sum2 ->
+    error.
+
+
+%% Encode the DNS response to the client
+encode(Data, #dns_rec{
+        header = Header,
+        qdlist = [#dns_query{
+                domain = Domain,
+                type = Type
+            }|_]} = Rec) ->
+    inet_dns:encode(Rec#dns_rec{
+            header = Header#dns_header{
+                qr = true,
+                ra = true
+            },
+            anlist = [#dns_rr{
+                    domain = Domain,
+                    type = Type,
+                    data = Data
+                }]}).
+
+
+% Resend a lost packet
+resend(_Socket, _IP, _Port, _Type, [], _Rec) ->
+    ok;
+resend(Socket, IP, Port, Type, Data, Rec) ->
+    {Payload, _, _} = data(Type, Data),
+    gen_udp:send(Socket, IP, Port, encode(Payload, Rec)).
 
 
