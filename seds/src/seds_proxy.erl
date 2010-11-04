@@ -40,7 +40,8 @@
         dnsfd,          % dns server socket
         s,              % proxied socket
 
-        sum = 0,        % number of bytes sent
+        sum_up = 0,     % number of bytes sent to server
+        sum_down = 0,   % number of bytes received from server
         data = [<<>>]   % list of binaries: data returned by proxied server
     }).
 
@@ -62,9 +63,9 @@
 %%% Interface
 %%--------------------------------------------------------------------
 send(Pid, IP, Port, #dns_rec{} = Query, {up, Data}) when is_pid(Pid) ->
-    gen_fsm:send_event(Pid, {dns_query, IP, Port, Query, Data});
+    gen_fsm:send_event(Pid, {up, IP, Port, Query, Data});
 send(Pid, IP, Port, #dns_rec{} = Query, {down, _}) when is_pid(Pid) ->
-    gen_fsm:send_event(Pid, {dns_query, IP, Port, Query}).
+    gen_fsm:send_event(Pid, {down, IP, Port, Query}).
 
 %%--------------------------------------------------------------------
 %%% Behaviours
@@ -110,11 +111,13 @@ handle_info({tcp_closed, Socket}, proxy, #state{s = Socket} = State) ->
 terminate(Reason, StateName, #state{
         ip = IP,
         port = Port,
-        sum = Sum
+        sum_up = Up,
+        sum_down = Down
     }) ->
     error_logger:info_report([
             {session_end, {IP, Port}},
-            {bytes_sent, Sum},
+            {bytes_sent, Up},
+            {bytes_rcvd, Down},
             {state, StateName},
             {reason, Reason}
         ]),
@@ -127,6 +130,10 @@ code_change(_OldVsn, StateName, State, _Extra) ->
 %%--------------------------------------------------------------------
 %%% States
 %%--------------------------------------------------------------------
+
+%%
+%% connect
+%%
 connect(timeout, #state{ip = IP, port = Port} = State) ->
     {ok, Socket} = gen_tcp:connect(IP, Port, [
             binary,
@@ -135,7 +142,13 @@ connect(timeout, #state{ip = IP, port = Port} = State) ->
         ], 5000),
     {next_state, proxy, State#state{s = Socket}}.
 
-proxy({dns_query, IP, Port,
+
+%%
+%% proxy
+%%
+
+% client sent data to be forwarded to server
+proxy({up, IP, Port,
         #dns_rec{
             header = Header,
             qdlist = [#dns_query{
@@ -144,16 +157,15 @@ proxy({dns_query, IP, Port,
                 }|_]
         } = Rec, Data},
     #state{
-        sum = Sum,
+        sum_up = Sum,
         dnsfd = DNSSocket,
         s = Socket
     } = State) ->
 
     Payload = base32:decode(string:to_upper(Data)),
+    Sum1 = Sum + length(Payload),
 
     ok = gen_tcp:send(Socket, Payload),
-
-    Sum1 = Sum + length(Payload),
 
     Packet = inet_dns:encode(
         Rec#dns_rec{
@@ -174,25 +186,29 @@ proxy({dns_query, IP, Port,
         ]),
 
     ok = gen_udp:send(DNSSocket, IP, Port, Packet),
-    {next_state, proxy, State, ?PROXY_TIMEOUT};
-proxy({dns_query, IP, Port,
+    {next_state, proxy, State#state{sum_up = Sum1},
+        ?PROXY_TIMEOUT};
+
+% client requested any pending data from server
+proxy({down, IP, Port,
         #dns_rec{
             header = Header,
             qdlist = [#dns_query{
                     domain = Domain,
                     type = Type
-                }|_]
-        } = Rec},
-    #state{
-        dnsfd = DNSSocket,
-        s = Socket,
-        data = Data
-    } = State) ->
+                }|_]} = Rec},
+        #state{
+            sum_down = Sum,
+            dnsfd = DNSSocket,
+            s = Socket,
+            data = Data
+        } = State) ->
 
     % Client polled, allow more data from server
     ok = inet:setopts(Socket, [{active, once}]),
 
     {Payload, Rest} = data(Type, Data),
+    Sum1 = Sum + length(Payload),
 
     Response = Rec#dns_rec{
         header = Header#dns_header{
@@ -215,6 +231,7 @@ proxy({dns_query, IP, Port,
     ok = gen_udp:send(DNSSocket, IP, Port, Packet),
 
     {next_state, proxy, State#state{
+            sum_down = Sum1,
             data = [Rest]
         }, ?PROXY_TIMEOUT};
 proxy(timeout, State) ->
