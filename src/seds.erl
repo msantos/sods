@@ -137,24 +137,17 @@ code_change(_OldVsn, State, _Extra) ->
 %%%
 %%% Internal Functions
 %%%
-proxy({{ServerIP, ServerPort}, SessionId} = Session, #state{
+proxy({{IP, Port}, Id} = Session, #state{
         s = Socket,
         p = Proxies
     }) ->
     case dict:find(Session, Proxies) of
         error ->
             error_logger:info_report([
-                    {proxy, starting},
-                    {socket, Socket},
-                    {id, SessionId},
-
-                    {serverip, ServerIP},
-                    {serverport, ServerPort}
+                    {session_start, {IP, Port}},
+                    {id, Id}
                 ]),
-            {ok, Pid} = seds_proxy:start_link(
-                Socket,
-                {ServerIP, ServerPort}
-            ),
+            {ok, Pid} = seds_proxy:start_link(Socket, {IP, Port}),
             {Pid, dict:store(Session, Pid, Proxies)};
         {ok, Pid} ->
             {Pid, Proxies}

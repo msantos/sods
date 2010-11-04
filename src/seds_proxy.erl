@@ -107,7 +107,17 @@ handle_info({tcp, Socket, Data}, proxy, #state{s = Socket} = State) ->
 handle_info({tcp_closed, Socket}, proxy, #state{s = Socket} = State) ->
     {stop, shutdown, State}.
 
-terminate(_Reason, _StateName, _State) ->
+terminate(Reason, StateName, #state{
+        ip = IP,
+        port = Port,
+        sum = Sum
+    }) ->
+    error_logger:info_report([
+            {session_end, {IP, Port}},
+            {bytes_sent, Sum},
+            {state, StateName},
+            {reason, Reason}
+        ]),
     ok.
 
 code_change(_OldVsn, StateName, State, _Extra) ->
@@ -143,11 +153,11 @@ proxy({dns_query, IP, Port,
         s = Socket
     } = State) ->
 
-    Payload = list_to_binary(base32:decode(string:to_upper(Data))),
+    Payload = base32:decode(string:to_upper(Data)),
 
     ok = gen_tcp:send(Socket, Payload),
 
-    Sum1 = Sum + byte_size(Payload),
+    Sum1 = Sum + length(Payload),
 
     Packet = inet_dns:encode(
         Rec#dns_rec{
@@ -164,21 +174,20 @@ proxy({dns_query, IP, Port,
 
     error_logger:info_report([
             {direction, up},
-            {dns_query, Rec},
-            {data, Data},
-            {base64, Payload},
-            {packet, Packet}
+            {dns_query, Rec}
         ]),
 
     ok = gen_udp:send(DNSSocket, IP, Port, Packet),
     {next_state, proxy, State, ?PROXY_TIMEOUT};
-proxy({dns_query, IP, Port, #dns_rec{
+proxy({dns_query, IP, Port,
+        #dns_rec{
             header = Header,
             qdlist = [#dns_query{
                     domain = Domain,
                     type = Type
                 }|_]
-        } = Rec}, #state{
+        } = Rec},
+    #state{
         dnsfd = DNSSocket,
         s = Socket,
         data = Data
@@ -204,11 +213,7 @@ proxy({dns_query, IP, Port, #dns_rec{
 
     error_logger:info_report([
             {direction, down},
-            {dns_query, Rec},
-            {data, Data},
-            {payload, Payload},
-            {response, Response},
-            {packet, Packet}
+            {dns_query, Rec}
         ]),
 
     ok = gen_udp:send(DNSSocket, IP, Port, Packet),
