@@ -133,10 +133,6 @@ connect(timeout, #state{ip = IP, port = Port} = State) ->
             {packet, 0},
             {active, once}
         ], 5000),
-    error_logger:info_report([
-            {proxy_forward, {IP, Port}},
-            {socket, Socket}
-        ]),
     {next_state, proxy, State#state{s = Socket}}.
 
 proxy({dns_query, IP, Port,
