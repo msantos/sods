@@ -166,10 +166,10 @@ proxy({up, IP, Port, Rec, ClientSum, Data},
             error_logger:info_report([{dropping, {IP, Port}}]),
             {next_state, proxy, State, ?PROXY_TIMEOUT};
         Packet ->
-            error_logger:info_report([
-                {direction, up},
-                {dns_query, Packet}
-            ]),
+%            error_logger:info_report([
+%                {direction, up},
+%                {dns_query, Packet}
+%            ]),
             ok = gen_tcp:send(Socket, Payload),
             ok = gen_udp:send(DNSSocket, IP, Port, Packet),
             {next_state, proxy, State#state{sum_up = Sum1},
@@ -201,10 +201,10 @@ proxy({down, IP, Port,
             {next_state, proxy, State#state{sum_down = Sum},
                 ?PROXY_TIMEOUT};
         Packet ->
-            error_logger:info_report([
-                {direction, down},
-                {dns_query, Rec}
-            ]),
+%            error_logger:info_report([
+%                {direction, down},
+%                {dns_query, Rec}
+%            ]),
             ok = inet:setopts(Socket, [{active, once}]),
             ok = gen_udp:send(DNSSocket, IP, Port, Packet),
             {next_state, proxy, State#state{
