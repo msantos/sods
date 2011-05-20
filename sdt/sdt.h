@@ -22,6 +22,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <time.h>
+#include <errno.h>
 
 #include <arpa/nameser.h>
 
@@ -30,7 +31,6 @@
 #include <arpa/inet.h>
 
 #include <netdb.h>
-extern int h_errno;
 
 
 #define SDT_VERSION     "0.9"
