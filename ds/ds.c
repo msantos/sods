@@ -122,7 +122,7 @@ main (int argc, char *argv[])
 
     int ch = 0;
 
-    IS_NULL(ds = (DS_STATE *)calloc(1, sizeof(DS_STATE)));
+    IS_NULL(ds = calloc(1, sizeof(DS_STATE)));
 
     ds->queryhost = HOSTNAME;
     ds->port.remote = 53;
@@ -202,7 +202,7 @@ ds_writer(DS_STATE *ds)
 
     struct in_addr ia;
 
-    IS_NULL(buf = (u_char *)calloc(1, NS_PACKETSZ));
+    IS_NULL(buf = calloc(1, NS_PACKETSZ));
 
     if (res_mkquery(ns_o_query, HOSTNAME, ns_c_in, ns_t_a, NULL, 0, NULL, buf, NS_PACKETSZ) < 0)
         errx(EXIT_FAILURE, "%s", hstrerror(h_errno));
@@ -230,7 +230,7 @@ ds_reader(DS_STATE *ds)
     char *status = NULL;
     char *rerr = NULL;
 
-    IS_NULL(buf = (u_char *)calloc(1, NS_PACKETSZ));
+    IS_NULL(buf = calloc(1, NS_PACKETSZ));
 
     for ( ; ; ) {
         if (woken > 0) return;

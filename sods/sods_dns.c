@@ -109,7 +109,7 @@ sds_dns_query_A(void *state, void *packet)
     int rv = -1;
 
     IS_NULL(b32 = strdup(pkt->buf));
-    IS_NULL(domain = (char *)calloc(NS_MAXDNAME, 1));
+    IS_NULL(domain = calloc(NS_MAXDNAME, 1));
 
     /*%s.%u-%u.id-%d.up.%s */
     /* parse out the base32 encoded data */
@@ -160,7 +160,7 @@ sds_dns_query_TXT(void *state, void *packet)
     char *domain = NULL;
     int rv = -1;
 
-    IS_NULL(domain = (char *)calloc(NS_MAXDNAME, 1));
+    IS_NULL(domain = calloc(NS_MAXDNAME, 1));
 
     if (sscanf(pkt->buf, "%u-%u.id-%u.down.%32s", (u_int32_t *)&pkt->sum,
                 &nonce, &pkt->sess.id, domain) != 4)
@@ -282,7 +282,7 @@ sds_dns_enc_CNAME(void *state, void *packet)
 
     NULL_RESPONSE(pkt);
 
-    IS_NULL(buf = (char *)calloc(sizeof(pkt->buf), 1));
+    IS_NULL(buf = calloc(sizeof(pkt->buf), 1));
 
     n = base32_encode_length(pkt->buflen); /* len includes NULL */
     if (n + (n/NS_MAXLABEL + 1) + 1 >= sizeof(pkt->buf)) {

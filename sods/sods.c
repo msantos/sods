@@ -41,7 +41,7 @@ main (int argc, char *argv[])
     int ch = 0;
     int di = 0;
 
-    IS_NULL(ss = (SDS_STATE *)calloc(1, sizeof(SDS_STATE)));
+    IS_NULL(ss = calloc(1, sizeof(SDS_STATE)));
 
     (void)memset(&ss->local, 0, sizeof(struct sockaddr_in));
     ss->local.sin_family = AF_INET;
@@ -107,7 +107,7 @@ main (int argc, char *argv[])
         usage(ss);
 
     ss->dn_max = argc;
-    IS_NULL(ss->dn = (char **)calloc(argc, sizeof(char *)));
+    IS_NULL(ss->dn = calloc(argc, sizeof(char *)));
     for ( di = 0; di < argc; di++) {
         if (strlen(argv[di]) > NS_MAXCDNAME - 1)
             usage(ss);
@@ -150,9 +150,9 @@ sds_parse_forward(SDS_STATE *ss, char *buf)
     }
 
     if (ss->fwd == NULL)
-        IS_NULL(ss->fwd = (SDS_FWD *)calloc(1, sizeof(SDS_FWD)));
+        IS_NULL(ss->fwd = calloc(1, sizeof(SDS_FWD)));
     else
-        IS_NULL(ss->fwd = (SDS_FWD *)realloc(ss->fwd, sizeof(SDS_FWD) * (ss->fwds + 1)));
+        IS_NULL(ss->fwd = realloc(ss->fwd, sizeof(SDS_FWD) * (ss->fwds + 1)));
 
     fw = ss->fwd + ss->fwds;
 

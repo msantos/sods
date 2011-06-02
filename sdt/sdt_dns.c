@@ -322,7 +322,7 @@ sdt_dns_dec_CNAME(SDT_STATE *ss, u_char *data, u_int16_t *n)
     char *buf = NULL;
     char b32[NS_PACKETSZ];
 
-    IS_NULL(buf = (char *)calloc(NS_PACKETSZ, 1));
+    IS_NULL(buf = calloc(NS_PACKETSZ, 1));
 
     if (dn_expand( (const u_char *)data, (const u_char *)data + *n,
                 (const u_char *)data, b32, NS_PACKETSZ) < 0) {

@@ -189,7 +189,7 @@ sds_io_alloc(SDS_STATE *ss, SDS_PKT *pkt)
     if (sds_q_init() < 0)
         errx(1, "sds_q_init");
 
-    IS_NULL(sc = (SDS_CONN *)calloc(1, sizeof(SDS_CONN)));
+    IS_NULL(sc = calloc(1, sizeof(SDS_CONN)));
 
     sc->id = pkt->sess.f.id;
     sc->lastseen = time(NULL);

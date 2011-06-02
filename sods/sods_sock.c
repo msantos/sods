@@ -50,7 +50,7 @@ sds_sock_loop(void *vp)
     SDS_STATE *ss = (SDS_STATE *)vp;
     SDS_PKT *pkt = NULL;
 
-    IS_NULL(pkt = (SDS_PKT *)calloc(1, sizeof(SDS_PKT)));
+    IS_NULL(pkt = calloc(1, sizeof(SDS_PKT)));
 
     (void)sds_sock_init(ss);
 

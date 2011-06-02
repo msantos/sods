@@ -42,7 +42,7 @@ main(int argc, char *argv[])
     int ch = 0;
     int di = 0;
 
-    IS_NULL(ss = (SDT_STATE *)calloc(1, sizeof(SDT_STATE)));
+    IS_NULL(ss = calloc(1, sizeof(SDT_STATE)));
 
     sdt_rand_init();
     (void)sdt_dns_init();
@@ -163,7 +163,7 @@ main(int argc, char *argv[])
         usage(ss);
 
     ss->dname_max = argc;
-    IS_NULL(ss->dname = (char **)calloc(argc, sizeof(char *)));
+    IS_NULL(ss->dname = calloc(argc, sizeof(char *)));
     for ( di = 0; di < argc; di++) {
         if (strlen(argv[di]) > NS_MAXCDNAME - 1)
             usage(ss);
@@ -343,7 +343,7 @@ sdt_loop_A(SDT_STATE *ss)
     flags |= O_NONBLOCK;
     (void)fcntl(ss->fd_in, F_SETFL, flags);
 
-    IS_NULL(buf = (char *)calloc(ss->bufsz, 1));
+    IS_NULL(buf = calloc(ss->bufsz, 1));
 
     while ( (n = sdt_read(ss, buf, ss->bufsz)) > 0) {
         VERBOSE(3, "Sending A record: %d of %u bytes\n", (int32_t)n, (u_int32_t)ss->bufsz);
