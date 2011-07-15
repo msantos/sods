@@ -21,7 +21,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
-#include <err.h>
 #include <sys/errno.h>
 
 #include <netinet/in.h>
@@ -47,7 +46,17 @@
 
 #include <syslog.h>
 
-#define SDS_VERSION     "0.03"
+#define SDS_VERSION     "0.04"
+#define SDS_PROGNAME    "sods"
+
+#ifdef HAVE_ERRX
+#include <err.h>
+#else
+#define err     sds_err
+#define errx    sds_errx
+#define warn    sds_warn
+#define warnx   sds_warnx
+#endif /* HAVE_ERRX */
 
 #define IS_ERR(x) do { \
     if ((x) == -1) { \
@@ -234,3 +243,9 @@ void sds_dns_packet(SDS_PKT *pkt, void *data, size_t len);
 
 int sds_priv_init(SDS_STATE *ss);
 
+#ifndef HAVE_ERRX
+void sds_err(int rv, char *fmt, ...);
+void sds_errx(int rv, char *fmt, ...);
+void sds_warn(char *fmt, ...);
+void sds_warnx(char *fmt, ...);
+#endif /* HAVE_ERRX */
