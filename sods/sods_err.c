@@ -23,14 +23,13 @@
 
 #include "sods.h"
 
-//extern char *__progname;
 
     void
 sds_err(int rv, char *fmt, ...)
 {
     va_list ap;
 
-    (void)fprintf(stderr, "sods: ");
+    (void)fprintf(stderr, "%s: ", SDS_PROGNAME);
     va_start(ap, fmt);
     (void)vfprintf(stderr, fmt, ap);
     va_end(ap);
@@ -44,7 +43,7 @@ sds_errx(int rv, char *fmt, ...)
 {
     va_list ap;
 
-    (void)fprintf(stderr, "sods: ");
+    (void)fprintf(stderr, "%s: ", SDS_PROGNAME);
     va_start(ap, fmt);
     vfprintf(stderr, fmt, ap);
     va_end(ap);
@@ -58,7 +57,7 @@ sds_warn(char *fmt, ...)
 {
     va_list ap;
 
-    (void)fprintf(stderr, "sods: ");
+    (void)fprintf(stderr, "%s: ", SDS_PROGNAME);
     va_start(ap, fmt);
     (void)vfprintf(stderr, fmt, ap);
     va_end(ap);
@@ -70,7 +69,7 @@ sds_warnx(char *fmt, ...)
 {
     va_list ap;
 
-    (void)fprintf(stderr, "sods: ");
+    (void)fprintf(stderr, "%s: ", SDS_PROGNAME);
     va_start(ap, fmt);
     vfprintf(stderr, fmt, ap);
     va_end(ap);

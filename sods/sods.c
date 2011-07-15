@@ -28,7 +28,6 @@
 
 #include "sods.h"
 
-extern char *__progname;
 
 int sds_parse_forward(SDS_STATE *ss, char *buf);
 void sds_print_forward(SDS_STATE *ss);
@@ -206,7 +205,7 @@ sds_timestamp(void)
     void
 usage(SDS_STATE *ss)
 {
-    (void)fprintf(stderr, "%s, %s\n", __progname, SDS_VERSION);
+    (void)fprintf(stderr, "%s, %s\n", SDS_PROGNAME, SDS_VERSION);
     (void)fprintf(stderr,
             "usage: sods <option> <domain name>\n"
             "             -c     max connections\n"

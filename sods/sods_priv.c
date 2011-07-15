@@ -33,7 +33,6 @@
 void sds_priv_daemon(SDS_STATE *ss);
 int sds_priv_drop(SDS_STATE *ss);
 
-extern char *__progname;
 
     int
 sds_priv_init(SDS_STATE *ss)
@@ -46,7 +45,7 @@ sds_priv_init(SDS_STATE *ss)
     void
 sds_priv_daemon(SDS_STATE *ss)
 {
-    openlog(__progname, LOG_NDELAY, LOG_DAEMON);
+    openlog(SDS_PROGNAME, LOG_NDELAY, LOG_DAEMON);
     IS_ERR(daemon(0, 0));
 }
 
