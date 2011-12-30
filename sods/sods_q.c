@@ -41,9 +41,6 @@ sds_q_get(u_int32_t id)
 {
     SDS_CONN *qe = NULL;
 
-    if (&head == NULL)
-        return (NULL);
-
     LIST_FOREACH(qe, &head, entries)
     {
         if (qe->id == id)
