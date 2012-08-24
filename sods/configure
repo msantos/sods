@@ -30,8 +30,8 @@ DEF=${DEF}
 LIB=${LIB}
 
 all:
-	\$(CC) \$(DEF) \$(LIB) -g -Wall -o sods sods.c sods_handler.c sods_dns.c sods_io.c \
-		sods_q.c sods_sock.c sods_priv.c sods_err.c base32.c base64.c
+	\$(CC) \$(DEF) -g -Wall -o sods sods.c sods_handler.c sods_dns.c sods_io.c \
+        sods_q.c sods_sock.c sods_priv.c sods_err.c base32.c base64.c \$(LIB)
 
 clean:
 	-@\$(RM) sods *.o
