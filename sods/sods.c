@@ -183,9 +183,9 @@ sds_print_forward(SDS_STATE *ss)
     void
 sds_timestamp(void)
 {
-    char outstr[200];
+    char outstr[200] = {0};
     time_t t;
-    struct tm *tmp;
+    struct tm *tmp = NULL;
 
     t = time(NULL);
     tmp = localtime(&t);

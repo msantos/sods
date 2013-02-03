@@ -100,9 +100,9 @@ sdt_dns_setns(char *ns)
 sdt_dns_A(SDT_STATE *ss, char *buf, ssize_t n)
 {
     char *p = NULL;
-    char dn[NS_MAXDNAME];
-    char query[NS_MAXDNAME];
-    char pkt[NS_PACKETSZ];
+    char dn[NS_MAXDNAME] = {0};
+    char query[NS_MAXDNAME] = {0};
+    char pkt[NS_PACKETSZ] = {0};
 
     int i = 0;
     int j = 0;
@@ -111,10 +111,6 @@ sdt_dns_A(SDT_STATE *ss, char *buf, ssize_t n)
 
     if (n < 1)
         return (-1);
-
-    (void)memset(dn, 0, sizeof(dn));
-    (void)memset(query, 0, sizeof(query));
-    (void)memset(pkt, 0, sizeof(pkt));
 
     nonce = (u_int16_t)arc4random();
 
@@ -158,15 +154,13 @@ sdt_dns_A(SDT_STATE *ss, char *buf, ssize_t n)
     char *
 sdt_dns_poll(SDT_STATE *ss, size_t *len)
 {
-    char query[NS_MAXDNAME];
-    char pkt[NS_PACKETSZ];
+    char query[NS_MAXDNAME] = {0};
+    char pkt[NS_PACKETSZ] = {0};
 
     char *buf = NULL;
     int buflen = 0;
 
     u_int16_t nonce = 0;
-
-    (void)memset(pkt, 0, sizeof(pkt));
 
     nonce = (u_int16_t)arc4random();
 
@@ -320,7 +314,7 @@ sdt_dns_dec_CNAME(SDT_STATE *ss, u_char *data, u_int16_t *n)
 {
     char *p = NULL;
     char *buf = NULL;
-    char b32[NS_PACKETSZ];
+    char b32[NS_PACKETSZ] = {0};
 
     IS_NULL(buf = calloc(NS_PACKETSZ, 1));
 

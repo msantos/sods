@@ -240,7 +240,7 @@ sds_dns_enc_TXT(void *state, void *packet)
     SDS_STATE *ss = (SDS_STATE *)ss;
     SDS_PKT *pkt = (SDS_PKT *)packet;
 
-    char b64[NS_PACKETSZ];
+    char b64[NS_PACKETSZ] = {0};
     struct dns_txtrec txt;
     ssize_t len = 0;
     size_t t = 0;
@@ -351,12 +351,11 @@ sds_dns_enc_NULL(void *state, void *packet)
     SDS_STATE *ss = (SDS_STATE *)ss;
     SDS_PKT *pkt = (SDS_PKT *)packet;
 
-    char b64[NS_PACKETSZ];
+    char b64[NS_PACKETSZ] = {0};
     size_t len = 0;
 
     NULL_RESPONSE(pkt);
 
-    (void)memset(&b64, 0, sizeof(b64));
     len = BASE64_LENGTH(pkt->buflen);
     base64_encode(pkt->buf, pkt->buflen, b64, sizeof(b64)-1);
 

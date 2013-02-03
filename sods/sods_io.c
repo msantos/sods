@@ -125,8 +125,8 @@ sds_io_open(SDS_STATE *ss, SDS_PKT *pkt)
 #ifdef HAVE_SETSOCKOPT
     int onoff = 1;
 #endif /* HAVE_SETSOCKOPT */
-    char src[INET_ADDRSTRLEN];
-    char dst[INET_ADDRSTRLEN];
+    char src[INET_ADDRSTRLEN] = {0};
+    char dst[INET_ADDRSTRLEN] = {0};
 
     if ( (sc = sds_io_alloc(ss, pkt)) == NULL)
         return (NULL);
