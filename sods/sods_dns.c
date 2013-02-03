@@ -407,7 +407,7 @@ sds_dns_packet(SDS_PKT *pkt, void *data, size_t len)
         return;
     }
 
-    (void)memcpy((void *)&pkt->data + pkt->datalen, data, len);
+    (void)memcpy(&pkt->data + pkt->datalen, data, len);
     pkt->datalen += len;
 }
 
