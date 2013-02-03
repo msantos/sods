@@ -1,7 +1,7 @@
 /*
  * Socket over DNS server.
  *
- * Copyright (c) 2009-2011 Michael Santos <michael.santos@gmail.com>
+ * Copyright (c) 2009-2013 Michael Santos <michael.santos@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -436,4 +436,3 @@ sds_dns_checkdn(SDS_STATE *ss, char *domain)
     VERBOSE(1, "rejecting request for domain: %s\n", p);
     return (-1);
 }
-

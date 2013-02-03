@@ -1,7 +1,7 @@
 /*
  * Socket over DNS server.
  *
- * Copyright (c) 2009-2011 Michael Santos <michael.santos@gmail.com>
+ * Copyright (c) 2009-2013 Michael Santos <michael.santos@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -210,4 +210,3 @@ sds_io_forward(SDS_STATE *ss, SDS_PKT *pkt)
             (ss->fwd + pkt->sess.f.fwd) :
             ss->fwd);
 }
-
