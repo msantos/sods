@@ -33,7 +33,7 @@
 #include <netdb.h>
 
 
-#define SDT_VERSION     "0.9"
+#define SDT_VERSION     "0.10.0"
 
 #ifdef HAVE_ERRX
 #include <err.h>

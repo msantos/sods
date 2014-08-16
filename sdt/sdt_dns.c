@@ -221,7 +221,7 @@ sdt_dns_parse(SDT_STATE *ss, char *pkt, int *pktlen)
         }
 
         if (ns_rr_type(rr) != ss->type) {
-            VERBOSE(1, "ns_rr_type != ns_t_txt\n");
+            VERBOSE(1, "ns_rr_type != %d (%d)\n", ss->type, ns_rr_type(rr));
             /* continue; */
             *pktlen = 0;
             return (NULL);
@@ -321,6 +321,7 @@ sdt_dns_dec_CNAME(SDT_STATE *ss, u_char *data, u_int16_t *n)
     if (dn_expand( (const u_char *)data, (const u_char *)data + *n,
                 (const u_char *)data, b32, NS_PACKETSZ) < 0) {
         *n = 0;
+        free(buf);
         return (NULL);
     }
 
@@ -381,6 +382,8 @@ sdt_dns_parsens(SDT_STATE *ss, char *buf)
                     ds->addr);
         }
 
+        free(serv);
+
         return (0);
     }
 
@@ -401,8 +404,10 @@ sdt_dns_parsens(SDT_STATE *ss, char *buf)
     }
 
     if (i == 0) {
-        if (sdt_dns_setns(optarg) < 0)
+        if (sdt_dns_setns(optarg) < 0) {
+            free(serv);
             return (-1);
+        }
     }
 
     free (serv);

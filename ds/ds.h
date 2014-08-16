@@ -36,7 +36,7 @@
 
 #include <sys/wait.h>
 
-#define DS_VERSION     "0.01"
+#define DS_VERSION     "0.2.0"
 
 #define IS_ERR(x) do { \
     if ((x) == -1) { \

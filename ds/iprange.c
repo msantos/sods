@@ -51,7 +51,7 @@ parseip (char *buf, in_addr_t *network, in_addr_t *broadcast)
     /* Determine the base IP address */
     if ( (addr = quad2hl(ip)) == 0) {
         warnx("Invalid IP address: %s", ip);
-        return (-1);
+        goto ERR;
     }
 
     /* Get the mask */
@@ -60,13 +60,19 @@ parseip (char *buf, in_addr_t *network, in_addr_t *broadcast)
 
     if (netmask == 0) {
         warnx("Invalid netmask: %s", mask);
-        return (-1);
+        goto ERR;
     }
 
     *network = addr & netmask;
     *broadcast = addr | ~netmask;
 
+    free(ip);
+
     return (0);
+
+ERR:
+    free(ip);
+    return -1;
 }
 
     in_addr_t

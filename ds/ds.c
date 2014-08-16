@@ -197,12 +197,10 @@ main (int argc, char *argv[])
     void
 ds_writer(DS_STATE *ds)
 {
-    u_char *buf = NULL;
+    u_char buf[NS_PACKETSZ] = {0};
     in_addr_t ip = 0;
 
     struct in_addr ia;
-
-    IS_NULL(buf = calloc(1, NS_PACKETSZ));
 
     if (res_mkquery(ns_o_query, HOSTNAME, ns_c_in, ns_t_a, NULL, 0, NULL, buf, NS_PACKETSZ) < 0)
         errx(EXIT_FAILURE, "%s", hstrerror(h_errno));
@@ -222,15 +220,13 @@ ds_writer(DS_STATE *ds)
     void
 ds_reader(DS_STATE *ds)
 {
-    u_char *buf = NULL;
+    u_char buf[NS_PACKETSZ] = {0};
     socklen_t len = 0;
 
     struct sockaddr_in sa;
     struct dns_header hdr;
     char *status = NULL;
     char *rerr = NULL;
-
-    IS_NULL(buf = calloc(1, NS_PACKETSZ));
 
     for ( ; ; ) {
         if (woken > 0) return;
@@ -251,7 +247,6 @@ ds_reader(DS_STATE *ds)
             continue;
         }
 
-        status = "UNKNOWN";
         rerr = "UNKNOWN";
 
         if (hdr.dns_flags & 0x80)

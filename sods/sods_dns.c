@@ -157,22 +157,15 @@ sds_dns_query_TXT(void *state, void *packet)
     SDS_PKT *pkt = (SDS_PKT *)packet;
 
     u_int32_t nonce = 0;
-    char *domain = NULL;
-    int rv = -1;
-
-    IS_NULL(domain = calloc(NS_MAXDNAME, 1));
+    char domain[NS_MAXDNAME] = {0};
 
     if (sscanf(pkt->buf, "%u-%u.id-%u.down.%32s", (u_int32_t *)&pkt->sum,
                 &nonce, &pkt->sess.id, domain) != 4)
-        goto ERR;
+        return -1;
 
     pkt->sess.id = ntohl(pkt->sess.id);
 
-    rv = sds_dns_checkdn(ss, domain);
-
-ERR:
-    free(domain);
-    return (rv);
+    return sds_dns_checkdn(ss, domain);
 }
 
 
@@ -237,7 +230,6 @@ sds_dns_enc_A(void *state, void *packet)
     ssize_t
 sds_dns_enc_TXT(void *state, void *packet)
 {
-    SDS_STATE *ss = (SDS_STATE *)ss;
     SDS_PKT *pkt = (SDS_PKT *)packet;
 
     char b64[NS_PACKETSZ] = {0};
@@ -287,6 +279,7 @@ sds_dns_enc_CNAME(void *state, void *packet)
     n = base32_encode_length(pkt->buflen); /* len includes NULL */
     if (n + (n/NS_MAXLABEL + 1) + 1 >= sizeof(pkt->buf)) {
         VERBOSE(0, "buffer overflow, biatch!");
+        free(buf);
         return (-1);
     }
 
@@ -348,7 +341,6 @@ sds_dns_enc_CNAME(void *state, void *packet)
     ssize_t
 sds_dns_enc_NULL(void *state, void *packet)
 {
-    SDS_STATE *ss = (SDS_STATE *)ss;
     SDS_PKT *pkt = (SDS_PKT *)packet;
 
     char b64[NS_PACKETSZ] = {0};
@@ -406,7 +398,7 @@ sds_dns_packet(SDS_PKT *pkt, void *data, size_t len)
         return;
     }
 
-    (void)memcpy((void *)&pkt->data + pkt->datalen, data, len);
+    (void)memcpy((char *)&pkt->data + pkt->datalen, data, len);
     pkt->datalen += len;
 }
 

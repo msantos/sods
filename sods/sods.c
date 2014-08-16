@@ -136,15 +136,20 @@ sds_parse_forward(SDS_STATE *ss, char *buf)
 
     IS_NULL(dst = strdup(buf));
 
-    if ( (port = strchr(dst, ':')) == NULL)
+    if ( (port = strchr(dst, ':')) == NULL) {
+        free(dst);
         return (-1);
+    }
     *port++ = '\0';
 
-    if (strlen(dst) > 128)
+    if (strlen(dst) > 128) {
+        free(dst);
         return (-1);
+    }
 
     if ( (he = gethostbyname(dst)) == NULL) {
         warnx("gethostbyname: %s", hstrerror(h_errno));
+        free(dst);
         return (-1);
     }
 

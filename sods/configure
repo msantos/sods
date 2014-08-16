@@ -4,7 +4,7 @@ OS=`uname -s`
 
 case $OS in
     'Linux')
-        DEF="-DHAVE_ERR -DHAVE_SEND"
+        DEF="-DHAVE_ERRX -DHAVE_SEND"
         LIB="-lresolv"
     ;;
     'Darwin'|'NetBSD')

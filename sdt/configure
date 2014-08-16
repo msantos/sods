@@ -6,7 +6,7 @@ case $OS in
     'Linux')
         STATIC_LIB=/usr/lib/libresolv.a
         LIB=-lcrypto
-        DEF="-DHAVE_ERR -DHAVE_SSL"
+        DEF="-DHAVE_ERRX -DHAVE_SSL"
     ;;
     'Darwin'|'NetBSD')
         DEF="-DHAVE_ARC4RANDOM -DHAVE_ERR"
