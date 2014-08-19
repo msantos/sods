@@ -2,7 +2,7 @@
  * Scan IP ranges for DNS servers and for servers
  * supporting recursion.
  *
- * Copyright (c) 2009-2013 Michael Santos <michael.santos@gmail.com>
+ * Copyright (c) 2009-2014 Michael Santos <michael.santos@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

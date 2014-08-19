@@ -2,7 +2,7 @@
  * Scan IP ranges for DNS servers and for servers
  * supporting recursion.
  *
- * Copyright (c) 2009-2013 Michael Santos <michael.santos@gmail.com>
+ * Copyright (c) 2009-2014 Michael Santos <michael.santos@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@
 #include "ds.h"
 #include "iprange.h"
 
-#define HOSTNAME    "www.example.com"
+#define DS_HOSTNAME    "www.example.com"
 
 extern char *__progname;
 
@@ -124,7 +124,7 @@ main (int argc, char *argv[])
 
     IS_NULL(ds = calloc(1, sizeof(DS_STATE)));
 
-    ds->queryhost = HOSTNAME;
+    ds->queryhost = DS_HOSTNAME;
     ds->port.remote = 53;
     ds->port.local = 53535;
 
@@ -202,7 +202,7 @@ ds_writer(DS_STATE *ds)
 
     struct in_addr ia;
 
-    if (res_mkquery(ns_o_query, HOSTNAME, ns_c_in, ns_t_a, NULL, 0, NULL, buf, NS_PACKETSZ) < 0)
+    if (res_mkquery(ns_o_query, DS_HOSTNAME, ns_c_in, ns_t_a, NULL, 0, NULL, buf, NS_PACKETSZ) < 0)
         errx(EXIT_FAILURE, "%s", hstrerror(h_errno));
 
     for (ip = ds->first; ip <= ds->last; ip++) {
@@ -266,7 +266,7 @@ ds_reader(DS_STATE *ds)
         else if (hdr.dns_flags & 0x0005)
             rerr = "REFUSED";
 
-        if (ds->verbose > 1)
+        if (ds->verbose > 0)
             (void)printf("Response: %s = %s/%s (%x) [%x]\n", inet_ntoa(sa.sin_addr),
                     status, rerr, hdr.dns_flags, hdr.dns_id);
         else
@@ -289,6 +289,17 @@ wakeup (int sig)
 void
 usage(DS_STATE *ds)
 {
-    (void)fprintf(stderr, "%s: [-H|-h|-p|-l]\n", __progname);
+    (void)fprintf(stderr, "%s: <options> <ipaddr>\n\n", __progname);
+    (void)fprintf(stderr,
+            "-H <hostname>          Name used in query (default: " DS_HOSTNAME ")\n"
+            "-h                     Usage\n"
+            "-p <port>              Remote port (default: 53)\n"
+            "-l <port>              Local port (default: 53535)\n"
+            "-v                     Be more verbose\n"
+            "\nExamples:\n"
+            "ds -vv 8.8.8.8\n"
+            "ds -v 8.8.4.4/24\n\n"
+            "Use ctl-C to exit\n\n"
+            );
     exit (EXIT_FAILURE);
 }

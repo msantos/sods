@@ -1,7 +1,7 @@
 /*
  * Socket over DNS client.
  *
- * Copyright (c) 2009-2013 Michael Santos <michael.santos@gmail.com>
+ * Copyright (c) 2009-2014 Michael Santos <michael.santos@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -480,27 +480,26 @@ wakeup(int sig)
     void
 usage(SDT_STATE *ss)
 {
-    (void)fprintf(stderr, "%s: [-h|-r|-v] <domain name>\n", __progname);
-    (void)fprintf(stderr, "[version %s]\n", SDT_VERSION);
-    (void)fprintf(stderr, "-h\tUsage\n");
-    (void)fprintf(stderr, "-A\tDelay A queries to force full buffer reads [default: %d microseconds]\n", ss->delay);
-    (void)fprintf(stderr, "-B\tSize of read buffer (A queries) [default: %d bytes]\n", (u_int32_t)ss->bufsz);
-    (void)fprintf(stderr, "-b\tMaximum backoff for polling server [default: %d]\n", ss->maxbackoff);
-    (void)fprintf(stderr, "-D\tDynamically forward a session\n");
-    (void)fprintf(stderr, "-F <num>\tFast start, number of small packets to pass w/out buffering (0 to disable) [default: %d]\n", ss->faststart);
-    (void)fprintf(stderr, "-M\tMaximum number of polling query failures [default: %d]\n", ss->maxpollfail);
-    (void)fprintf(stderr, "-m\tMinimum time to sleep between nameserver queries [default: %d us]\n", ss->sleep);
-    (void)fprintf(stderr, "-n <roundrobin|random>\tStrategy for shuffling domain names [default: roundrobin]\n");
-    (void)fprintf(stderr, "-p <port>\tproxy port, listen on a TCP port instead of using stdin/stdout\n");
-    (void)fprintf(stderr, "-R <number>\tNumber of retries for lookup\n");
-    (void)fprintf(stderr, "-r\tNameserver (or keyword: random, opendns, verizon, speakeasy, google)\n");
-    (void)fprintf(stderr, "-S [rotate|blast]\tResolver strategy\n");
-    (void)fprintf(stderr, "-s <number>\tForward session\n");
-    (void)fprintf(stderr, "-T <number>\tUse TCP [0 = new connection for each request, 1 = pipeline requests]\n");
-    (void)fprintf(stderr, "-t <DNS type>\tTXT, CNAME, NULL [Default = TXT]\n");
-    (void)fprintf(stderr, "-V <num>\tNumber of debug messages\n");
-    (void)fprintf(stderr, "-v\tPrint debug messages\n");
-    (void)fprintf(stderr, "-x <number>\tResolver transmit timeout\n");
+    (void)fprintf(stderr, "%s: [-h|-r|-v] <domain name>\n[version %s]\n", __progname, SDT_VERSION);
+    (void)fprintf(stderr, "-h                       Usage\n");
+    (void)fprintf(stderr, "-A                       Delay A queries to force full buffer reads [default: %d microseconds]\n", ss->delay);
+    (void)fprintf(stderr, "-B                       Size of read buffer (A queries) [default: %d bytes]\n", (u_int32_t)ss->bufsz);
+    (void)fprintf(stderr, "-b                       Maximum backoff for polling server [default: %d]\n", ss->maxbackoff);
+    (void)fprintf(stderr, "-D                       Dynamically forward a session\n");
+    (void)fprintf(stderr, "-F <num>                 Fast start, number of small packets to pass w/out buffering (0 to disable) [default: %d]\n", ss->faststart);
+    (void)fprintf(stderr, "-M                       Maximum number of polling query failures [default: %d]\n", ss->maxpollfail);
+    (void)fprintf(stderr, "-m                       Minimum time to sleep between nameserver queries [default: %d us]\n", ss->sleep);
+    (void)fprintf(stderr, "-n <roundrobin|random>   Strategy for shuffling domain names [default: roundrobin]\n");
+    (void)fprintf(stderr, "-p <port>                proxy port, listen on a TCP port instead of using stdin/stdout\n");
+    (void)fprintf(stderr, "-R <number>              Number of retries for lookup\n");
+    (void)fprintf(stderr, "-r <namserver>           Nameserver (or keyword: random, opendns, verizon, speakeasy, google)\n");
+    (void)fprintf(stderr, "-S [rotate|blast]        Resolver strategy\n");
+    (void)fprintf(stderr, "-s <number>              Forward session\n");
+    (void)fprintf(stderr, "-T <number>              Use TCP [0 = new connection for each request, 1 = pipeline requests]\n");
+    (void)fprintf(stderr, "-t <DNS type>            TXT, CNAME, NULL [Default = TXT]\n");
+    (void)fprintf(stderr, "-V <num>                 Number of debug messages\n");
+    (void)fprintf(stderr, "-v                       Print debug messages\n");
+    (void)fprintf(stderr, "-x <number>              Resolver transmit timeout\n");
     (void)fprintf(stderr, "\nExample: %s -r 127.0.0.1 sshdns.a.example.com\n\n", __progname);
 
     if (ss->verbose > 0)
