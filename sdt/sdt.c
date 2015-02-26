@@ -44,10 +44,10 @@ main(int argc, char *argv[])
 
     IS_NULL(ss = calloc(1, sizeof(SDT_STATE)));
 
-    sdt_rand_init();
+    ss->rand = sdt_rand_init();
     (void)sdt_dns_init();
 
-    ss->sess.o.id = (u_int16_t)arc4random();
+    ss->sess.o.id = (u_int16_t)sdt_arc4random(ss->rand);
     ss->backoff = 1;
     ss->maxbackoff = MAXBACKOFF;
     ss->sleep = SLEEP_TXT;

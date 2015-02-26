@@ -11,8 +11,7 @@ The protocol is interoperable with OzymanDNS
 
 ## WHAT DO I NEED TO BUILD IT?
 
-Not much. OpenSSL is optional, if your OS doesn't support
-arc4random().
+Not much.
 
 sods has been built on Ubuntu Linux, Maemo, OpenWRT, Mac OS X and
 Solaris.

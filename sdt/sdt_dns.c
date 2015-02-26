@@ -19,7 +19,6 @@
  */
 #include <sys/types.h>
 #include <netinet/in.h>
-#include <arpa/nameser.h>
 #include <resolv.h>
 #include <netdb.h>
 
@@ -112,7 +111,7 @@ sdt_dns_A(SDT_STATE *ss, char *buf, ssize_t n)
     if (n < 1)
         return (-1);
 
-    nonce = (u_int16_t)arc4random();
+    nonce = (u_int16_t)sdt_arc4random(ss->rand);
 
     /* Base32 encode the buffer and lowercase the result */
     if (base32_encode_length(n) >= sizeof(dn))
@@ -162,7 +161,7 @@ sdt_dns_poll(SDT_STATE *ss, size_t *len)
 
     u_int16_t nonce = 0;
 
-    nonce = (u_int16_t)arc4random();
+    nonce = (u_int16_t)sdt_arc4random(ss->rand);
 
     switch (ss->protocol) {
         case PROTO_DYN_FWD:
@@ -376,7 +375,7 @@ sdt_dns_parsens(SDT_STATE *ss, char *buf)
 
     if (strcasecmp(serv, "random") == 0) {
         for (i = 0; i < MAXNS; i++) {
-            ds = dnsserv + (arc4random()%((sizeof(dnsserv)/sizeof(SDS_SERV))-1));
+            ds = dnsserv + (sdt_arc4random(ss->rand)%((sizeof(dnsserv)/sizeof(SDS_SERV))-1));
             (void)sdt_dns_setns(ds->addr);
             VERBOSE(1, "Using %s (%s) = %s\n", ds->name, ds->descr,
                     ds->addr);
@@ -444,5 +443,5 @@ sdt_dns_dn_roundrobin(void *state)
 sdt_dns_dn_random(void *state)
 {
     SDT_STATE *ss = state;
-    return (ss->dname[arc4random() % ss->dname_max]);
+    return (ss->dname[sdt_arc4random(ss->rand) % ss->dname_max]);
 }

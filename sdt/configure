@@ -4,9 +4,12 @@ OS=`uname -s`
 
 case $OS in
     'Linux')
-        STATIC_LIB=/usr/lib/libresolv.a
-        LIB=-lcrypto
-        DEF="-DHAVE_ERRX -DHAVE_SSL"
+        if [ -e /usr/lib/libresolv.a ]; then
+            STATIC_LIB=/usr/lib/libresolv.a
+        else
+            STATIC_LIB=/usr/lib/*/libresolv.a
+        fi
+        DEF="-DHAVE_ERRX -DHAVE_URANDOM"
     ;;
     'Darwin'|'NetBSD')
         DEF="-DHAVE_ARC4RANDOM -DHAVE_ERR"
@@ -23,7 +26,7 @@ case $OS in
 esac
 
 cat<<EOF>Makefile
-CC=gcc
+CC=cc
 RM=rm
 APP=sdt
 

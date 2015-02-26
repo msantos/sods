@@ -44,15 +44,6 @@
 #define warnx   sdt_warnx
 #endif /* HAVE_ERRX */
 
-#ifndef HAVE_ARC4RANDOM
-#ifdef HAVE_SSL
-#define arc4random  sdt_rand
-#else
-#define arc4random  random
-#endif /* HAVE_SSL */
-#endif /* HAVE_ARC4RANDOM */
-
-
 #define IS_ERR(x) do { \
     if ((x) == -1) { \
         err(EXIT_FAILURE, "%s", #x); \
@@ -137,6 +128,7 @@ typedef struct _SDT_STATE {
     pid_t       child;
     int         verbose;
     int         verbose_lines;
+    int         rand;
 
     in_port_t   proxy_port;
     int         fd_in;
@@ -190,9 +182,10 @@ char *sdt_dns_dn_roundrobin(void *state);
 char *sdt_dns_dn_random(void *state);
 
 
-void sdt_rand_init(void);
+int sdt_rand_init(void);
+u_int32_t sdt_arc4random(int);
 #ifndef HAVE_ARC4RANDOM
-u_int32_t sdt_rand(void);
+u_int32_t sdt_rand(int);
 #endif
 
 void wakeup(int sig);
