@@ -26,7 +26,7 @@ case $OS in
 esac
 
 if [ -e /dev/urandom ]; then
-    DEF="${DEF} -HAVE_URANDOM"
+    DEF="${DEF} -DHAVE_URANDOM"
 fi
 
 cat<<EOF>Makefile
