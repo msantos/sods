@@ -9,10 +9,10 @@ case $OS in
         else
             STATIC_LIB=/usr/lib/*/libresolv.a
         fi
-        DEF="-DHAVE_ERRX -DHAVE_URANDOM"
+        DEF="-DHAVE_ERRX"
     ;;
     'Darwin'|'NetBSD')
-        DEF="-DHAVE_ARC4RANDOM -DHAVE_ERR"
+        DEF="-DHAVE_ARC4RANDOM -DHAVE_ERRX"
         LIB="-lresolv"
     ;;
     'SunOS')
@@ -24,6 +24,10 @@ case $OS in
     ;;
 
 esac
+
+if [ -e /dev/urandom ]; then
+    DEF="${DEF} -HAVE_URANDOM"
+fi
 
 cat<<EOF>Makefile
 CC=cc
