@@ -19,7 +19,6 @@
  */
 #ifndef HAVE_ERRX
 #include <stdarg.h>
-#include <errno.h>
 
 #include "sods.h"
 

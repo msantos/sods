@@ -21,7 +21,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
-#include <sys/errno.h>
+#include <errno.h>
 
 #include <netinet/in.h>
 #include <arpa/nameser.h>
@@ -41,7 +41,6 @@
 #include <sys/queue.h>
 
 #include <sys/socket.h>
-#include <netinet/in.h>
 #include <arpa/inet.h>
 
 #include <syslog.h>

@@ -11,6 +11,14 @@ case $OS in
         DEF="-DHAVE_ERR -DHAVE_SETSOCKOPT -Wno-deprecated-declarations"
         LIB="-lresolv"
     ;;
+    'OpenBSD')
+        if [ ! -e /usr/local/lib/libbind/libbind.a ]; then
+            echo "Please install libbind: sudo pkg_add libbind"
+            exit 1
+        fi
+        DEF="-DHAVE_ERR"
+	LIB="-L/usr/local/lib/libbind -Wl,-rpath=/usr/local/lib/libbind -lbind -I/usr/local/include/bind"
+    ;;
     'SunOS')
         LIB="-lresolv"
     ;;
@@ -22,7 +30,7 @@ case $OS in
 esac
 
 cat<<EOF>Makefile
-CC=gcc
+CC=cc
 RM=rm
 APP=sods
 
