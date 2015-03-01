@@ -8,7 +8,7 @@ case $OS in
         LIB="-lresolv"
     ;;
     'Darwin'|'NetBSD')
-        DEF="-DHAVE_ERR -DHAVE_SETSOCKOPT -Wno-deprecated-declarations"
+        DEF="-DHAVE_ERRX -DHAVE_SETSOCKOPT -Wno-deprecated-declarations"
         LIB="-lresolv"
     ;;
     'OpenBSD')
@@ -16,8 +16,16 @@ case $OS in
             echo "Please install libbind: sudo pkg_add libbind"
             exit 1
         fi
-        DEF="-DHAVE_ERR"
-	LIB="-L/usr/local/lib/libbind -Wl,-rpath=/usr/local/lib/libbind -lbind -I/usr/local/include/bind"
+        DEF="-DHAVE_ERRX"
+        LIB="-L/usr/local/lib/libbind -Wl,-rpath=/usr/local/lib/libbind -lbind -I/usr/local/include/bind"
+    ;;
+    'FreeBSD')
+        if [ ! -e /usr/local/lib/libbind.a ]; then
+            echo "Please install libbind: sudo pkg add libbind"
+            exit 1
+        fi
+        DEF="-DHAVE_ERRX"
+        LIB="-L/usr/local/lib -lbind -I/usr/local/include/bind"
     ;;
     'SunOS')
         LIB="-lresolv"
