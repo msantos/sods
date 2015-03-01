@@ -177,6 +177,8 @@ main(int argc, char *argv[])
     VERBOSE(1, "session id = %u, opt = %u, session = %d\n", ss->sess.o.id,
             ss->sess.o.opt, ss->sess.o.fwd);
 
+    (void)signal(SIGPIPE, SIG_IGN);
+
     switch (pid = fork()) {
         case -1:
             err(EXIT_FAILURE, "fork");

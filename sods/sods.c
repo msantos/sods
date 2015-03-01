@@ -30,6 +30,8 @@ main (int argc, char *argv[])
     int ch = 0;
     int di = 0;
 
+    (void)signal(SIGPIPE, SIG_IGN);
+
     IS_NULL(ss = calloc(1, sizeof(SDS_STATE)));
 
     (void)memset(&ss->local, 0, sizeof(struct sockaddr_in));
