@@ -21,3 +21,14 @@
 #define LIST_FOREACH(var, head, field)                  \
         for((var) = (head)->lh_first; (var); (var) = (var)->field.le_next)
 #endif /* LIST_FOREACH */
+
+#ifndef LIST_FOREACH_SAFE
+#define LIST_FIRST(head)        ((head)->lh_first)
+#define LIST_END(head)          NULL
+#define LIST_NEXT(elm, field)       ((elm)->field.le_next)
+
+#define LIST_FOREACH_SAFE(var, head, field, tvar)           \
+    for ((var) = LIST_FIRST(head);              \
+        (var) && ((tvar) = LIST_NEXT(var, field), 1);       \
+        (var) = (tvar))
+#endif /* LIST_FOREACH_SAFE */

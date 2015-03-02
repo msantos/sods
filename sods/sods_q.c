@@ -68,8 +68,9 @@ sds_q_add(SDS_STATE *ss, SDS_CONN *sc)
 sds_q_del(u_int32_t id)
 {
     SDS_CONN *qe = NULL;
+    SDS_CONN *qtmp = NULL;
 
-    LIST_FOREACH(qe, &head, entries)
+    LIST_FOREACH_SAFE(qe, &head, entries, qtmp)
     {
         if (qe->id == id) {
             qe->close(qe);
@@ -86,12 +87,13 @@ sds_q_del(u_int32_t id)
 sds_q_free(SDS_STATE *ss)
 {
     SDS_CONN *qe = NULL;
+    SDS_CONN *qtmp = NULL;
     time_t now = 0;
     int rv = 0;
 
     now = time(NULL);
 
-    LIST_FOREACH(qe, &head, entries)
+    LIST_FOREACH_SAFE(qe, &head, entries, qtmp)
     {
         if (now - qe->lastseen >= ss->maxtimeout) {
             qe->close(qe);
@@ -108,8 +110,13 @@ sds_q_free(SDS_STATE *ss)
     void
 sds_q_destroy(void)
 {
-    while (head.lh_first != NULL)
-        LIST_REMOVE(head.lh_first, entries);
+    SDS_CONN *qe = NULL;
+
+    while (!LIST_EMPTY(&head)) {
+        qe = LIST_FIRST(&head);
+        LIST_REMOVE(qe, entries);
+        free(qe);
+    }
 }
 
     void
