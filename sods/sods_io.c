@@ -177,7 +177,6 @@ sds_io_open(SDS_STATE *ss, SDS_PKT *pkt)
 sds_io_close(void *qe)
 {
     SDS_CONN *sc = (SDS_CONN *)qe;
-    (void)shutdown(sc->s, SHUT_RDWR);
     return (close(sc->s));
 }
 
