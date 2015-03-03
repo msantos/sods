@@ -48,6 +48,14 @@
 #define SDS_VERSION     "0.5.0"
 #define SDS_PROGNAME    "sods"
 
+#ifndef MAX
+#define MAX(x,y) ((x) > (y) ? (x) : (y))
+#endif
+
+#ifndef MIN
+#define MIN(x,y) ((x) < (y) ? (x) : (y))
+#endif
+
 #ifdef HAVE_ERRX
 #include <err.h>
 #else

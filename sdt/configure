@@ -32,7 +32,12 @@ case $OS in
         LIB="-L/usr/local/lib -lbind -I/usr/local/include/bind"
     ;;
     'SunOS')
-        LIB="-lresolv"
+        if [ ! -e /opt/local/lib/libbind.a ]; then
+            echo "Please install libbind: sudo pkg_add libbind"
+            exit 1
+        fi
+        DEF="-DHAVE_ERRX"
+        LIB="-lsocket -lnsl -L/opt/local/lib -Wl,-rpath=/opt/local/lib -lbind -I/opt/local/include/bind"
     ;;
     *)
         echo "Guessing, adjust Makefile by hand ..."
@@ -60,4 +65,3 @@ all:
 clean:
 	-@\$(RM) *.o \$(APP)
 EOF
-
