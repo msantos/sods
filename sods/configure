@@ -43,8 +43,8 @@ case $OS in
 esac
 
 cat<<EOF>Makefile
-CC=cc
-RM=rm
+CC ?= cc
+RM ?= rm
 APP=sods
 
 DEF=${DEF}

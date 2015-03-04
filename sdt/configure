@@ -51,8 +51,8 @@ if [ -e /dev/urandom ]; then
 fi
 
 cat<<EOF>Makefile
-CC=cc
-RM=rm
+CC ?= cc
+RM ?= rm
 APP=sdt
 
 STATIC_LIB=${STATIC_LIB}

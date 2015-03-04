@@ -1,5 +1,5 @@
-CC=gcc
-RM=rm
+CC ?= cc
+RM ?= rm
 
 #LIB=/usr/lib/libresolv.a
 LIB=-lresolv
