@@ -433,15 +433,13 @@ sdt_dns_print_servers(SDT_STATE *ss)
 /* Strategies for iterating through multiple
  * domain names */
     char *
-sdt_dns_dn_roundrobin(void *state)
+sdt_dns_dn_roundrobin(SDT_STATE *ss)
 {
-    SDT_STATE *ss = state;
     return (ss->dname[ss->dname_iterator++ % ss->dname_max]);
 }
 
     char *
-sdt_dns_dn_random(void *state)
+sdt_dns_dn_random(SDT_STATE *ss)
 {
-    SDT_STATE *ss = state;
     return (ss->dname[sdt_arc4random(ss->rand) % ss->dname_max]);
 }

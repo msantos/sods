@@ -109,7 +109,7 @@ typedef union _SDT_ID {
     u_int32_t id;
 } SDT_ID;
 
-typedef struct _SDT_STATE {
+typedef struct SDT_STATE {
     char        **dname;
     int         dname_max;
     int         dname_iterator;
@@ -138,7 +138,7 @@ typedef struct _SDT_STATE {
     char        *target;
     in_port_t   target_port;
 
-    char *(*dname_next)(void *state);
+    char *(*dname_next)(struct SDT_STATE *state);
 } SDT_STATE;
 
 /* Protocol version */
@@ -178,8 +178,8 @@ char *sdt_dns_dec_CNAME(SDT_STATE *ss, u_char *data, u_int16_t *n);
 char *sdt_dns_dec_TXT(SDT_STATE *ss, u_char *data, u_int16_t *n);
 char *sdt_dns_dec_NULL(SDT_STATE *ss, u_char *data, u_int16_t *n);
 void sdt_dns_print_servers(SDT_STATE *ss);
-char *sdt_dns_dn_roundrobin(void *state);
-char *sdt_dns_dn_random(void *state);
+char *sdt_dns_dn_roundrobin(SDT_STATE *ss);
+char *sdt_dns_dn_random(SDT_STATE *ss);
 
 
 int sdt_rand_init(void);
