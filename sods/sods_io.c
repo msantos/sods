@@ -23,11 +23,8 @@
 SDS_FWD * sds_io_forward(SDS_STATE *ss, SDS_PKT *pkt);
 
     int
-sds_io_write(void *state, void *packet)
+sds_io_write(SDS_STATE *ss, SDS_PKT *pkt)
 {
-    SDS_STATE *ss = (SDS_STATE *)state;
-    SDS_PKT *pkt = (SDS_PKT *)packet;
-
     SDS_CONN *sc = NULL;
     ssize_t n = 0;
     ssize_t t = 0;
@@ -63,11 +60,8 @@ sds_io_write(void *state, void *packet)
 }
 
     int
-sds_io_read(void *state, void *packet)
+sds_io_read(SDS_STATE *ss, SDS_PKT *pkt)
 {
-    SDS_STATE *ss = (SDS_STATE *)state;
-    SDS_PKT *pkt = (SDS_PKT *)packet;
-
     SDS_CONN *sc = NULL;
     ssize_t n = 0;
 

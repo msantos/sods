@@ -96,11 +96,8 @@ sds_dns_getdn(SDS_STATE *ss, SDS_PKT *pkt)
  *
  */
     int
-sds_dns_query_A(void *state, void *packet)
+sds_dns_query_A(SDS_STATE *ss, SDS_PKT *pkt)
 {
-    SDS_STATE *ss = (SDS_STATE *)state;
-    SDS_PKT *pkt = (SDS_PKT *)packet;
-
     char *b32 = NULL;
     char *domain = NULL;
     char *p = NULL;
@@ -151,11 +148,8 @@ ERR:
  *
  */
     int
-sds_dns_query_TXT(void *state, void *packet)
+sds_dns_query_TXT(SDS_STATE *ss, SDS_PKT *pkt)
 {
-    SDS_STATE *ss = (SDS_STATE *)state;
-    SDS_PKT *pkt = (SDS_PKT *)packet;
-
     u_int32_t nonce = 0;
     char domain[NS_MAXDNAME] = {0};
 
@@ -213,11 +207,8 @@ sds_dns_setflags(SDS_STATE *ss, SDS_PKT *pkt)
  * A response
  */
     ssize_t
-sds_dns_enc_A(void *state, void *packet)
+sds_dns_enc_A(SDS_STATE *ss, SDS_PKT *pkt)
 {
-    SDS_STATE *ss = (SDS_STATE *)state;
-    SDS_PKT *pkt = (SDS_PKT *)packet;
-
     (void)memcpy(&pkt->buf, &ss->ip.s_addr, NS_INADDRSZ);
     pkt->buflen = NS_INADDRSZ;
     ss->ip.s_addr = htonl(ntohl(ss->ip.s_addr)+1);
@@ -228,10 +219,8 @@ sds_dns_enc_A(void *state, void *packet)
  * TXT response
  */
     ssize_t
-sds_dns_enc_TXT(void *state, void *packet)
+sds_dns_enc_TXT(SDS_STATE *ss, SDS_PKT *pkt)
 {
-    SDS_PKT *pkt = (SDS_PKT *)packet;
-
     char b64[NS_PACKETSZ] = {0};
     struct dns_txtrec txt;
     ssize_t len = 0;
@@ -260,11 +249,8 @@ sds_dns_enc_TXT(void *state, void *packet)
  * CNAME response
  */
     ssize_t
-sds_dns_enc_CNAME(void *state, void *packet)
+sds_dns_enc_CNAME(SDS_STATE *ss, SDS_PKT *pkt)
 {
-    SDS_STATE *ss = (SDS_STATE *)state;
-    SDS_PKT *pkt = (SDS_PKT *)packet;
-
     char *buf = NULL;
     char *p = NULL;
     char *cp = NULL;
@@ -339,10 +325,8 @@ sds_dns_enc_CNAME(void *state, void *packet)
  *
  */
     ssize_t
-sds_dns_enc_NULL(void *state, void *packet)
+sds_dns_enc_NULL(SDS_STATE *ss, SDS_PKT *pkt)
 {
-    SDS_PKT *pkt = (SDS_PKT *)packet;
-
     char b64[NS_PACKETSZ] = {0};
     size_t len = 0;
 
@@ -362,11 +346,8 @@ sds_dns_enc_NULL(void *state, void *packet)
  * Generic DNS repsonse for READ requests
  */
     int
-sds_dns_response(void *state, void *packet)
+sds_dns_response(SDS_STATE *ss, SDS_PKT *pkt)
 {
-    SDS_STATE *ss = (SDS_STATE *)state;
-    SDS_PKT *pkt = (SDS_PKT *)packet;
-
     struct dns_answer ans;
 
     (void)memset(&ans, 0, sizeof(ans));

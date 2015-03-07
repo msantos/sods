@@ -33,10 +33,8 @@
  */
 
     int
-sds_handler(void *state, void *packet)
+sds_handler(SDS_STATE *ss, SDS_PKT *pkt)
 {
-    SDS_STATE *ss = (SDS_STATE *)state;
-    SDS_PKT *pkt = (SDS_PKT *)packet;
     ssize_t n = 0;
 
     LTZERO(ss->decapsulate(ss, pkt));   /* Parse data from application layer */
@@ -50,10 +48,8 @@ sds_handler(void *state, void *packet)
 }
 
     int
-sds_decapsulate(void *state, void *packet)
+sds_decapsulate(SDS_STATE *ss, SDS_PKT *pkt)
 {
-    SDS_STATE *ss = (SDS_STATE *)state;
-    SDS_PKT *pkt = (SDS_PKT *)packet;
     int type = 0;
 
     /* defaults */
@@ -103,10 +99,8 @@ sds_decapsulate(void *state, void *packet)
 }
 
     int
-sds_chk_notequal(void *state, int a, int b)
+sds_chk_notequal(SDS_STATE *ss, int a, int b)
 {
-    SDS_STATE *ss = (SDS_STATE *)state;
-
     VERBOSE(1, "sum: saved = %d, packet = %d\n", a, b);
 
     /* New connections */
@@ -121,10 +115,8 @@ sds_chk_notequal(void *state, int a, int b)
 }
 
     int
-sds_chk_isequal(void *state, int a, int b)
+sds_chk_isequal(SDS_STATE *ss, int a, int b)
 {
-    SDS_STATE *ss = (SDS_STATE *)state;
-
     if (a == b)
         return (0);
 

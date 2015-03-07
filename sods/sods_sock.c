@@ -45,9 +45,8 @@ sds_sock_init(SDS_STATE *ss)
 }
 
     void
-sds_sock_loop(void *vp)
+sds_sock_loop(SDS_STATE *ss)
 {
-    SDS_STATE *ss = (SDS_STATE *)vp;
     SDS_PKT *pkt = NULL;
 
     IS_NULL(pkt = calloc(1, sizeof(SDS_PKT)));

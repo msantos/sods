@@ -120,9 +120,8 @@ sds_q_destroy(void)
 }
 
     void
-sds_cleanup (void *state)
+sds_cleanup(SDS_STATE *ss)
 {
-    SDS_STATE *ss = (SDS_STATE *)state;
     int n = 0;
 
     VERBOSE(3, "cleaning up connections\n");

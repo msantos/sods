@@ -99,12 +99,15 @@
 #define MAXFWDS         32      /* Maximum number of allowed forwarders */
 #define MAXDNAMELIST    256     /* Maximum number of domain names */
 
+struct SDS_PKT;
+struct SDS_STATE;
+
 typedef struct _SDS_FWD {
     u_int8_t    sess;           /* Unused */
     struct sockaddr_in sa;
 } SDS_FWD;
 
-typedef struct _SDS_STATE {
+typedef struct SDS_STATE {
     int s;
     char **dn;
     int dn_max;
@@ -123,10 +126,10 @@ typedef struct _SDS_STATE {
     int daemon;
     int verbose;
 
-    void (*run)(void *state);
-    void (*cleanup)(void *state);
-    int (*handler)(void *state, void *packet);
-    int (*decapsulate)(void *state, void *packet);
+    void (*run)(struct SDS_STATE *);
+    void (*cleanup)(struct SDS_STATE *);
+    int (*handler)(struct SDS_STATE *, struct SDS_PKT *);
+    int (*decapsulate)(struct SDS_STATE *, struct SDS_PKT *);
 } SDS_STATE;
 
 struct dns_header {
@@ -161,7 +164,7 @@ typedef union _SDS_ID {
     u_int32_t   id;
 } SDS_ID;
 
-typedef struct _SDS_PKT {
+typedef struct SDS_PKT {
     struct {
         struct dns_header hdr;
         u_char query[NS_PACKETSZ - sizeof(struct dns_header)];
@@ -177,11 +180,11 @@ typedef struct _SDS_PKT {
     SDS_ID sess;
     size_t nread;           /* amount of data to read from socket */
 
-    int (*parse)(void *state, void *packet);
-    ssize_t (*encode)(void *state, void *packet);
-    int (*encapsulate)(void *state, void *packet);
-    int (*chksum)(void *state, int a, int b);
-    int (*forward)(void *state, void *packet);
+    int (*parse)(SDS_STATE *, struct SDS_PKT *);
+    ssize_t (*encode)(SDS_STATE *, struct SDS_PKT *);
+    int (*encapsulate)(SDS_STATE *, struct SDS_PKT *);
+    int (*chksum)(SDS_STATE *, int a, int b);
+    int (*forward)(SDS_STATE *, struct SDS_PKT *);
 } SDS_PKT;
 
 struct _SDS_CONN {
@@ -212,40 +215,40 @@ int sds_q_add(SDS_STATE *ss, SDS_CONN *sc);
 int sds_q_del(u_int32_t id);
 int sds_q_free(SDS_STATE *ss);
 void sds_q_destroy(void);
-void sds_cleanup(void *state);
+void sds_cleanup(SDS_STATE *ss);
 
 /* IO */
-int sds_io_write(void *state, void *packet);
-int sds_io_read(void *state, void *packet);
+int sds_io_write(SDS_STATE *ss, SDS_PKT *pkt);
+int sds_io_read(SDS_STATE *ss, SDS_PKT *pkt);
 int sds_io_close(void *qe);
 
 /* socket */
 int sds_sock_init(SDS_STATE *ss);
-void sds_sock_loop(void *vp);
+void sds_sock_loop(SDS_STATE *ss);
 int sds_sock_recv(SDS_STATE *ss, SDS_PKT *pkt);
 int sds_sock_send(SDS_STATE *ss, SDS_PKT *pkt);
 
 /* handler */
-int sds_handler(void *state, void *packet);
-int sds_decapsulate(void *state, void *packet);
-int sds_chk_notequal(void *state, int a, int b);
-int sds_chk_isequal(void *state, int a, int b);
+int sds_handler(SDS_STATE *ss, SDS_PKT *pkt);
+int sds_decapsulate(SDS_STATE *ss, SDS_PKT *pkt);
+int sds_chk_notequal(SDS_STATE *ss, int a, int b);
+int sds_chk_isequal(SDS_STATE *ss, int a, int b);
 
 /* DNS */
     /* query */
 int sds_dns_type(SDS_PKT *pkt);
 int sds_dns_getdn(SDS_STATE *ss, SDS_PKT *pkt);
-int sds_dns_query_A(void *state, void *packet);
-int sds_dns_query_TXT(void *state, void *packet);
+int sds_dns_query_A(SDS_STATE *ss, SDS_PKT *pkt);
+int sds_dns_query_TXT(SDS_STATE *ss, SDS_PKT *pkt);
 int sds_dns_checkdn(SDS_STATE *ss, char *domain);
 
     /* response */
 void sds_dns_setflags(SDS_STATE *ss, SDS_PKT *pkt);
-ssize_t sds_dns_enc_A(void *state, void *packet);
-ssize_t sds_dns_enc_TXT(void *state, void *packet);
-ssize_t sds_dns_enc_CNAME(void *state, void *packet);
-ssize_t sds_dns_enc_NULL(void *state, void *packet);
-int sds_dns_response(void *state, void *packet);
+ssize_t sds_dns_enc_A(SDS_STATE *ss, SDS_PKT *pkt);
+ssize_t sds_dns_enc_TXT(SDS_STATE *ss, SDS_PKT *pkt);
+ssize_t sds_dns_enc_CNAME(SDS_STATE *ss, SDS_PKT *pkt);
+ssize_t sds_dns_enc_NULL(SDS_STATE *ss, SDS_PKT *pkt);
+int sds_dns_response(SDS_STATE *ss, SDS_PKT *pkt);
 void sds_dns_packet(SDS_PKT *pkt, void *data, size_t len);
 
 int sds_priv_init(SDS_STATE *ss);
