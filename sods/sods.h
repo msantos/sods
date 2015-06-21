@@ -45,7 +45,7 @@
 
 #include <syslog.h>
 
-#define SDS_VERSION     "0.5.0"
+#define SDS_VERSION     "0.6.0"
 #define SDS_PROGNAME    "sods"
 
 #ifndef MAX

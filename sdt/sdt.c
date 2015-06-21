@@ -486,7 +486,7 @@ usage(SDT_STATE *ss)
     (void)fprintf(stderr, "-A                       Delay A queries to force full buffer reads [default: %d microseconds]\n", ss->delay);
     (void)fprintf(stderr, "-B                       Size of read buffer (A queries) [default: %d bytes]\n", (u_int32_t)ss->bufsz);
     (void)fprintf(stderr, "-b                       Maximum backoff for polling server [default: %d]\n", ss->maxbackoff);
-    (void)fprintf(stderr, "-D                       Dynamically forward a session\n");
+    (void)fprintf(stderr, "-D <host>:<port>         Dynamically forward a session\n");
     (void)fprintf(stderr, "-F <num>                 Fast start, number of small packets to pass w/out buffering (0 to disable) [default: %d]\n", ss->faststart);
     (void)fprintf(stderr, "-M                       Maximum number of polling query failures [default: %d]\n", ss->maxpollfail);
     (void)fprintf(stderr, "-m                       Minimum time to sleep between nameserver queries [default: %d us]\n", ss->sleep);

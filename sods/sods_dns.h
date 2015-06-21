@@ -18,4 +18,5 @@
  *
  */
 #include "base32.h"
-#include "base64.h"
+
+#define BASE64_LENGTH(n)    ((((n) + 2) / 3) * 4)

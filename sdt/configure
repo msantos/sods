@@ -60,7 +60,7 @@ DEF=${DEF}
 LIB=${LIB}
 
 all:
-	\$(CC) \$(DEF) -g -Wall \$(LIB) -o \$(APP) \$(APP).c \$(APP)_dns.c \$(APP)_err.c \$(APP)_rand.c base32.c base64.c \$(STATIC_LIB)
+	\$(CC) \$(DEF) -g -Wall \$(LIB) -o \$(APP) \$(APP).c \$(APP)_dns.c \$(APP)_err.c \$(APP)_rand.c base32.c \$(STATIC_LIB)
 
 clean:
 	-@\$(RM) *.o \$(APP)

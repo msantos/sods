@@ -19,6 +19,7 @@
  */
 #include "sods.h"
 #include "sods_dns.h"
+#include <resolv.h>
 
 #define NULL_RESPONSE(x) do { \
         if ((x)->buflen == 0) { \
@@ -232,7 +233,9 @@ sds_dns_enc_TXT(SDS_STATE *ss, SDS_PKT *pkt)
         ssize_t s = MIN(pkt->buflen - len, BUFLEN);
 
         (void)memset(&txt, 0, sizeof(struct dns_txtrec));
-        base64_encode(pkt->buf + len, s, txt.data, sizeof(txt.data)-1);
+        if (b64_ntop((u_char *)pkt->buf+len, s, txt.data, sizeof(txt.data)) < 0)
+            errx(EXIT_FAILURE, "sds_dns_enc_TXT: invalid input: %zu/%zu",
+                    s, sizeof(txt.data));
         txt.len = BASE64_LENGTH(s);
         (void)memcpy(b64 + t, &txt, sizeof(txt.len) + txt.len);
         t += sizeof(txt.len) + txt.len;
@@ -241,7 +244,7 @@ sds_dns_enc_TXT(SDS_STATE *ss, SDS_PKT *pkt)
     (void)memset(&pkt->buf, 0, sizeof(pkt->buf));
     (void)memcpy(&pkt->buf, b64, t);
     pkt->buflen = t;
-    return (t);
+    return t;
 }
 
 
@@ -333,12 +336,14 @@ sds_dns_enc_NULL(SDS_STATE *ss, SDS_PKT *pkt)
     NULL_RESPONSE(pkt);
 
     len = BASE64_LENGTH(pkt->buflen);
-    base64_encode(pkt->buf, pkt->buflen, b64, sizeof(b64)-1);
+    if (b64_ntop((u_char *)pkt->buf, pkt->buflen, b64, sizeof(b64)) < 0)
+        errx(EXIT_FAILURE, "sds_dns_enc_NULL: invalid input: %zu/%zu",
+                len, sizeof(b64));
 
     (void)memset(&pkt->buf, 0, sizeof(pkt->buf));
     (void)memcpy(&pkt->buf, b64, len);
     pkt->buflen = len;
-    return (pkt->buflen);
+    return pkt->buflen;
 }
 
 

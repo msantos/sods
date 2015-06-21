@@ -25,7 +25,6 @@
 #include <ctype.h>
 
 #include "base32.h"
-#include "base64.h"
 
 #include "sdt.h"
 #include "sdt_servers.h"
@@ -260,14 +259,14 @@ sdt_dns_dec_TXT(SDT_STATE *ss, u_char *data, u_int16_t *n)
     char *buf = NULL;
     size_t len = 0;
 
-    char *out = NULL;
-    size_t outlen = 0;
-
     IS_NULL(buf = calloc(NS_PACKETSZ, 1));
     dp = p = data;
 
     for ( ; p - dp < *n ; p += *p+1) {
         char *lf = NULL;
+        char *out = NULL;
+        size_t outlen = 0;
+        size_t maxlen = 0;
 
         struct {
             u_int8_t len;
@@ -286,12 +285,8 @@ sdt_dns_dec_TXT(SDT_STATE *ss, u_char *data, u_int16_t *n)
         while ( (lf = strchr(rec.data, 0x0A)) != NULL)
             (void)memmove(lf, lf+1, strlen(lf));
 
-        if (base64_decode_alloc(rec.data, strlen(rec.data), &out, &outlen) == 0) {
-            VERBOSE(0, "Invalid base64 encoded packet\n");
-            free(buf);
-            return (NULL);
-        }
-
+        maxlen = strlen(rec.data) * 3 / 4 + 1;
+        out = calloc(maxlen, 1);
 
         if (out == NULL)
             err(EXIT_FAILURE, "Could not allocate memory");
@@ -299,13 +294,21 @@ sdt_dns_dec_TXT(SDT_STATE *ss, u_char *data, u_int16_t *n)
         if (len + outlen >= NS_PACKETSZ)
             errx(EXIT_FAILURE, "buffer overflow v2, biatch!");
 
+        outlen = b64_pton(rec.data, (u_char *)out, maxlen);
+        if (outlen < 0) {
+            VERBOSE(0, "Invalid base64 encoded packet\n");
+            free(buf);
+            free(out);
+            return NULL;
+        }
+
         (void)memcpy(buf + len, out, outlen);
 
         len += outlen;
         free (out);
     }
     *n = len;
-    return (buf);
+    return buf;
 }
 
     char *
@@ -345,10 +348,8 @@ sdt_dns_dec_NULL(SDT_STATE *ss, u_char *data, u_int16_t *n)
     while ( (lf = strchr((char *)data, 0x0A)) != NULL)
         (void)memmove(lf, lf+1, strlen(lf));
 
-    if (base64_decode_alloc((char *)data, *n, &out, &outlen) == 0) {
-        VERBOSE(0, "Invalid base64 encoded packet\n");
-        return (NULL);
-    }
+    outlen = *n * 3 / 4 + 1;
+    out = calloc(outlen, 1);
 
     if (out == NULL)
         err(EXIT_FAILURE, "Could not allocate memory");
@@ -356,7 +357,13 @@ sdt_dns_dec_NULL(SDT_STATE *ss, u_char *data, u_int16_t *n)
     if (outlen >= NS_PACKETSZ)
         errx(EXIT_FAILURE, "buffer overflow v2, biatch!");
 
-    *n = outlen;
+    *n = b64_pton((char *)data, (u_char *)out, outlen);
+
+    if (*n < 0) {
+        VERBOSE(0, "Invalid base64 encoded packet\n");
+        return (NULL);
+    }
+
     return (out);
 }
 
