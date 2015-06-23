@@ -41,7 +41,7 @@ sds_sock_init(SDS_STATE *ss)
 
     (void)sigaction(SIGALRM, &sa, NULL);
 
-    return (0);
+    return 0;
 }
 
     void
@@ -84,12 +84,12 @@ sds_sock_recv(SDS_STATE *ss, SDS_PKT *pkt)
         switch (errno) {
             case EAGAIN:
             case EINTR:
-                return (-1);
+                return -1;
             default:
                 err(EXIT_FAILURE, "sds_sock_recv: recvfrom");
         }
     }
-    return (0);
+    return 0;
 }
 
     int
@@ -103,13 +103,13 @@ sds_sock_send(SDS_STATE *ss, SDS_PKT *pkt)
         switch (errno) {
             case EAGAIN:
             case EINTR:
-                return (-1);
+                return -1;
             default:
                 err(EXIT_FAILURE, "sds_sock_send: sendto");
         }
     }
 
-    return (0);
+    return 0;
 }
 
 void

@@ -33,7 +33,7 @@ sds_q_init(void)
         LIST_INIT(&head);
         init = 1;
     }
-    return (0);
+    return 0;
 }
 
     SDS_CONN *
@@ -44,10 +44,10 @@ sds_q_get(u_int32_t id)
     LIST_FOREACH(qe, &head, entries)
     {
         if (qe->id == id)
-            return (qe);
+            return qe;
     }
 
-    return (NULL);
+    return NULL;
 }
 
     int
@@ -55,13 +55,13 @@ sds_q_add(SDS_STATE *ss, SDS_CONN *sc)
 {
     if (nel >= ss->maxconn) {
         if (sds_q_free(ss) == 0)
-            return (-1); /* No slots available */
+            return -1; /* No slots available */
     }
 
     LIST_INSERT_HEAD(&head, sc, entries);
     nel++;
 
-    return (0);
+    return 0;
 }
 
     int
@@ -77,10 +77,10 @@ sds_q_del(u_int32_t id)
             LIST_REMOVE(qe, entries);
             free(qe);
             nel--;
-            return (0);
+            return 0;
         }
     }
-    return (-1);
+    return -1;
 }
 
     int
@@ -104,7 +104,7 @@ sds_q_free(SDS_STATE *ss)
         }
     }
 
-    return (rv);
+    return rv;
 }
 
     void

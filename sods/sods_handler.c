@@ -44,7 +44,7 @@ sds_handler(SDS_STATE *ss, SDS_PKT *pkt)
 
     (void)pkt->encapsulate(ss, pkt);    /* Encode packet into protocol format */
 
-    return (n);
+    return n;
 }
 
     int
@@ -62,7 +62,7 @@ sds_decapsulate(SDS_STATE *ss, SDS_PKT *pkt)
     switch ( (type = sds_dns_type(pkt))) {
         case ns_t_invalid:
             VERBOSE(0, "Invalid DNS packet");
-            return (-1);
+            return -1;
         case ns_t_a:
             pkt->parse = &sds_dns_query_A;
             pkt->forward = &sds_io_write;
@@ -83,7 +83,7 @@ sds_decapsulate(SDS_STATE *ss, SDS_PKT *pkt)
         case ns_t_ns:
         default:
             VERBOSE(0, "Unsupported packet type = %d\n", type);
-            return (-1);
+            return -1;
     }
 
     LTZERO(sds_dns_getdn(ss, pkt));
@@ -95,7 +95,7 @@ sds_decapsulate(SDS_STATE *ss, SDS_PKT *pkt)
     VERBOSE(1, "\t\tid = %d: up = %u, down = %u\n", pkt->sess.f.id,
             (u_int32_t)pkt->sum_up, (u_int32_t)pkt->sum);
 
-    return (0);
+    return 0;
 }
 
     int
@@ -105,23 +105,23 @@ sds_chk_notequal(SDS_STATE *ss, int a, int b)
 
     /* New connections */
     if ((a == 0) && (b == 0))
-        return (0);
+        return 0;
 
     if (a != b)
-        return (0);
+        return 0;
 
     VERBOSE(0, "Duplicate packet, discarding: sum = %d\n", a);
-    return (-1);
+    return -1;
 }
 
     int
 sds_chk_isequal(SDS_STATE *ss, int a, int b)
 {
     if (a == b)
-        return (0);
+        return 0;
 
     VERBOSE(0, "Re-transmitting buffer: saved = %d, sent = %d\n",
             a, b);
 
-    return (-1);
+    return -1;
 }

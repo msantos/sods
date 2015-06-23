@@ -39,7 +39,7 @@ sds_priv_init(SDS_STATE *ss)
 {
     if (ss->daemon == 1)
         sds_priv_daemon(ss);
-    return (sds_priv_drop(ss));
+    return sds_priv_drop(ss);
 }
 
     void
@@ -57,7 +57,7 @@ sds_priv_drop(SDS_STATE *ss)
 
     if (geteuid() != 0) {
         warnx("uid != 0. Not dropping privs");
-        return (1);
+        return 1;
     }
 
     SETVAR(ss->proc.user, SDS_USER);
@@ -66,22 +66,22 @@ sds_priv_drop(SDS_STATE *ss)
 
     if ( (pw = getpwnam(ss->proc.user)) == NULL) {
         warnx("user does not exist: %s", ss->proc.user);
-        return (-1);
+        return -1;
     }
 
     if ( (gr = getgrnam(ss->proc.group)) == NULL) {
         warnx("group does not exist: %s", ss->proc.group);
-        return (-1);
+        return -1;
     }
 
     if (chroot(ss->proc.chroot) < 0) {
         warn("%s", ss->proc.chroot);
-        return (-1);
+        return -1;
     }
 
     IS_ERR(chdir("/"));
     LTZERO(setgid(gr->gr_gid));
     LTZERO(setuid(pw->pw_uid));
 
-    return (0);
+    return 0;
 }

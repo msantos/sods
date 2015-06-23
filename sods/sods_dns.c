@@ -45,10 +45,10 @@ sds_dns_type(SDS_PKT *pkt)
     u_char *p = NULL;
 
     if ( (p = memchr(pkt->data.query, '\0', pkt->datalen - sizeof(pkt->data.hdr) - 1)) == NULL)
-        return (0);
+        return 0;
 
     (void)memcpy(&pkt->type, p + 1, sizeof(pkt->type));
-    return ( (pkt->type = ntohs(pkt->type)));
+    return (pkt->type = ntohs(pkt->type));
 }
 
 /*
@@ -71,7 +71,7 @@ sds_dns_getdn(SDS_STATE *ss, SDS_PKT *pkt)
                 htons(pkt->data.hdr.no_authority));
 
         if ( (p = memchr(pkt->data.query, '\0', pkt->datalen - sizeof(pkt->data.hdr) - 4)) == NULL)
-            return (-1);
+            return -1;
 
         pkt->datalen = sizeof(pkt->data.hdr) + strlen((char *)pkt->data.query) + 5; /* 2 * sizeof(u_int16_t): NS type, NS class */
 
@@ -80,10 +80,10 @@ sds_dns_getdn(SDS_STATE *ss, SDS_PKT *pkt)
         pkt->data.hdr.no_authority = 0;
     }
 
-    return (dn_expand( (const u_char *)&pkt->data.hdr,
+    return dn_expand((const u_char *)&pkt->data.hdr,
                 (const u_char *)&pkt->data.hdr + pkt->datalen,
                 (const u_char *)&pkt->data.query, pkt->buf,
-                sizeof(pkt->buf)));
+                sizeof(pkt->buf));
 }
 
 /*
@@ -139,7 +139,7 @@ sds_dns_query_A(SDS_STATE *ss, SDS_PKT *pkt)
 ERR:
     free(b32);
     free(domain);
-    return (rv);
+    return rv;
 }
 
 /*
@@ -213,7 +213,7 @@ sds_dns_enc_A(SDS_STATE *ss, SDS_PKT *pkt)
     (void)memcpy(&pkt->buf, &ss->ip.s_addr, NS_INADDRSZ);
     pkt->buflen = NS_INADDRSZ;
     ss->ip.s_addr = htonl(ntohl(ss->ip.s_addr)+1);
-    return (pkt->buflen);
+    return pkt->buflen;
 }
 
 /*
@@ -269,7 +269,7 @@ sds_dns_enc_CNAME(SDS_STATE *ss, SDS_PKT *pkt)
     if (n + (n/NS_MAXLABEL + 1) + 1 >= sizeof(pkt->buf)) {
         VERBOSE(0, "buffer overflow, biatch!");
         free(buf);
-        return (-1);
+        return -1;
     }
 
     base32_encode_into(pkt->buf, pkt->buflen, buf);
@@ -320,7 +320,7 @@ sds_dns_enc_CNAME(SDS_STATE *ss, SDS_PKT *pkt)
 
     /* b32 length + # length fields + terminating NULL */
     pkt->buflen = n + j + 1;
-    return (pkt->buflen);
+    return pkt->buflen;
 }
 
 /*
@@ -372,7 +372,7 @@ sds_dns_response(SDS_STATE *ss, SDS_PKT *pkt)
     (void)memcpy(&pkt->buf, &pkt->data, sizeof(pkt->buf)); /* XXX */
     pkt->buflen = pkt->datalen;
 
-    return (0);
+    return 0;
 }
 
 
@@ -399,17 +399,17 @@ sds_dns_checkdn(SDS_STATE *ss, char *domain)
 
 #if 0
     if (strcmp(domain, "sshdns") != 0)
-        return (-1);
+        return -1;
 #endif
 
     if (strcmp(ss->dn[0], "any") == 0)
-        return (0);
+        return 0;
 
     for ( i = 0; i < ss->dn_max; i++) {
         if (strncmp(ss->dn[i], p, strlen(ss->dn[i])+1) == 0)
-            return (0);
+            return 0;
     }
 
     VERBOSE(1, "rejecting request for domain: %s\n", p);
-    return (-1);
+    return -1;
 }

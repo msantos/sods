@@ -45,7 +45,7 @@ sdt_dns_init(void)
     _res.retrans = 3;
     _res.retry = 1;
 
-    return (0);
+    return 0;
 }
 
     void
@@ -81,17 +81,17 @@ sdt_dns_setns(char *ns)
     struct hostent *he = NULL;
 
     if ( (ns == NULL) || (nx > MAXNS - 1))
-        return (-1);
+        return -1;
 
     if ( (he = gethostbyname(ns)) == NULL) {
         warnx("gethostbyname: %s", hstrerror(h_errno));
-        return (-1);
+        return -1;
     }
 
     (void)memcpy(&_res.nsaddr_list[nx++].sin_addr, he->h_addr_list[0], he->h_length);
     _res.nscount = nx;
 
-    return (0);
+    return 0;
 }
 
     int
@@ -108,7 +108,7 @@ sdt_dns_A(SDT_STATE *ss, char *buf, ssize_t n)
     u_int16_t nonce = 0;
 
     if (n < 1)
-        return (-1);
+        return -1;
 
     nonce = (u_int16_t)sdt_arc4random(ss->rand);
 
@@ -143,10 +143,10 @@ sdt_dns_A(SDT_STATE *ss, char *buf, ssize_t n)
     VERBOSE(2, "A:%s\n", query);
     if (res_search(query, ns_c_in, ns_t_a, (u_char *)&pkt, sizeof(pkt)) < 0) {
         VERBOSE(1, "sdt_dns_A: res_search: %s\n", hstrerror(h_errno));
-        return (-1);
+        return -1;
     }
 
-    return (0);
+    return 0;
 }
 
     char *
@@ -182,13 +182,13 @@ sdt_dns_poll(SDT_STATE *ss, size_t *len)
     if ( (buflen = res_search(query, ns_c_in, ss->type, (u_char *)&pkt, sizeof(pkt))) < 0) {
         VERBOSE(1, "sdt_dns_poll: res_search: %s\n", hstrerror(h_errno));
         ss->pollfail++;
-        return (NULL);
+        return NULL;
     }
 
     buf = sdt_dns_parse(ss, pkt, &buflen);
     *len = buflen;
 
-    return (buf);
+    return buf;
 }
 
 /* Retrieve the answer and base64
@@ -205,7 +205,7 @@ sdt_dns_parse(SDT_STATE *ss, char *pkt, int *pktlen)
 
     if (ns_initparse((u_char *)pkt, *pktlen, &nsh) < 0) {
         VERBOSE(1, "Invalid response in record\n");
-        return (NULL);
+        return NULL;
     }
 
 #if 0
@@ -215,21 +215,21 @@ sdt_dns_parse(SDT_STATE *ss, char *pkt, int *pktlen)
         if (ns_parserr(&nsh, ns_s_an, 0, &rr)) {
             VERBOSE(1, "ns_parserr\n");
             *pktlen = 0;
-            return (NULL);
+            return NULL;
         }
 
         if (ns_rr_type(rr) != ss->type) {
             VERBOSE(1, "ns_rr_type != %d (%d)\n", ss->type, ns_rr_type(rr));
             /* continue; */
             *pktlen = 0;
-            return (NULL);
+            return NULL;
         }
 
         type = ns_rr_type(rr);
         rrlen = ns_rr_rdlen(rr);
 
         if (rrlen > *pktlen)
-            return (NULL);
+            return NULL;
 
         switch (type) {
             case ns_t_txt:
@@ -247,7 +247,7 @@ sdt_dns_parse(SDT_STATE *ss, char *pkt, int *pktlen)
 #endif
 
     *pktlen = rrlen;
-    return (buf);
+    return buf;
 }
 
 
@@ -324,14 +324,14 @@ sdt_dns_dec_CNAME(SDT_STATE *ss, u_char *data, u_int16_t *n)
                 (const u_char *)data, b32, NS_PACKETSZ) < 0) {
         *n = 0;
         free(buf);
-        return (NULL);
+        return NULL;
     }
 
     while ( (p = strchr(b32, '.')) != NULL)
         (void)memmove(p, p+1, strlen(p));
 
     *n = base32_decode_into(b32, NS_PACKETSZ, buf);
-    return (buf);
+    return buf;
 }
 
     char *
@@ -342,7 +342,7 @@ sdt_dns_dec_NULL(SDT_STATE *ss, u_char *data, u_int16_t *n)
     char *lf = NULL;
 
     if (*data == 0)
-        return (NULL);
+        return NULL;
 
     /* Remove base64 linefeeds used for formatting */
     while ( (lf = strchr((char *)data, 0x0A)) != NULL)
@@ -361,10 +361,10 @@ sdt_dns_dec_NULL(SDT_STATE *ss, u_char *data, u_int16_t *n)
 
     if (*n < 0) {
         VERBOSE(0, "Invalid base64 encoded packet\n");
-        return (NULL);
+        return NULL;
     }
 
-    return (out);
+    return out;
 }
 
 
@@ -390,7 +390,7 @@ sdt_dns_parsens(SDT_STATE *ss, char *buf)
 
         free(serv);
 
-        return (0);
+        return 0;
     }
 
     if ( (p = strchr(serv, ':')) != NULL) {
@@ -412,12 +412,12 @@ sdt_dns_parsens(SDT_STATE *ss, char *buf)
     if (i == 0) {
         if (sdt_dns_setns(optarg) < 0) {
             free(serv);
-            return (-1);
+            return -1;
         }
     }
 
     free (serv);
-    return (0);
+    return 0;
 }
 
     void

@@ -124,25 +124,25 @@ sds_parse_forward(SDS_STATE *ss, char *buf)
     SDS_FWD *fw = NULL;
 
     if (ss->fwds > MAXFWDS)
-        return (0);
+        return 0;
 
     IS_NULL(dst = strdup(buf));
 
     if ( (port = strchr(dst, ':')) == NULL) {
         free(dst);
-        return (-1);
+        return -1;
     }
     *port++ = '\0';
 
     if (strlen(dst) > 128) {
         free(dst);
-        return (-1);
+        return -1;
     }
 
     if ( (he = gethostbyname(dst)) == NULL) {
         warnx("gethostbyname: %s", hstrerror(h_errno));
         free(dst);
-        return (-1);
+        return -1;
     }
 
     if (ss->fwd == NULL)
@@ -158,7 +158,7 @@ sds_parse_forward(SDS_STATE *ss, char *buf)
 
     ss->fwds++;
     free(dst);
-    return (0);
+    return 0;
 }
 
     void

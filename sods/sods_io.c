@@ -38,25 +38,25 @@ sds_io_write(SDS_STATE *ss, SDS_PKT *pkt)
     if ( (sc = sds_q_get(pkt->sess.f.id)) == NULL) {
         if ( (sc = sds_io_open(ss, pkt)) == NULL) {
             pkt->err = ns_r_servfail;
-            return (-1);
+            return -1;
         }
     }
 
     if (pkt->chksum(ss, sc->sum_up, pkt->sum_up) < 0)
-        return (0);
+        return 0;
 
     while ( (n = send(sc->s, pkt->buf + t, pkt->buflen - t, flags)) != (pkt->buflen - t)) {
         if (n == -1) {
             (void)sds_q_del(sc->id);
             warn("socket send");
-            return (n);
+            return n;
         }
         t += n;
     }
     sc->sum_up = pkt->sum_up;
     sc->lastseen = time(NULL);
 
-    return (pkt->buflen);
+    return pkt->buflen;
 }
 
     int
@@ -68,14 +68,14 @@ sds_io_read(SDS_STATE *ss, SDS_PKT *pkt)
     if ( (sc = sds_q_get(pkt->sess.f.id)) == NULL) {
         if ( (sc = sds_io_open(ss, pkt)) == NULL) {
             pkt->err = ns_r_servfail;
-            return (-1);
+            return -1;
         }
     }
 
     if (pkt->chksum(ss, sc->sum, pkt->sum) < 0) {
         (void)memcpy(pkt->buf, sc->buf, sc->buflen);
         pkt->buflen = sc->buflen;
-        return (pkt->buflen);
+        return pkt->buflen;
     }
 
     sc->lastseen = time(NULL);
@@ -107,7 +107,7 @@ sds_io_read(SDS_STATE *ss, SDS_PKT *pkt)
             break;
     }
 
-    return (n);
+    return n;
 }
 
     SDS_CONN *
@@ -123,7 +123,7 @@ sds_io_open(SDS_STATE *ss, SDS_PKT *pkt)
     char dst[INET_ADDRSTRLEN] = {0};
 
     if ( (sc = sds_io_alloc(ss, pkt)) == NULL)
-        return (NULL);
+        return NULL;
 
     fw = sds_io_forward(ss, pkt);
 
@@ -158,20 +158,20 @@ sds_io_open(SDS_STATE *ss, SDS_PKT *pkt)
                 pkt->err = ns_r_servfail;
                 sds_io_close(sc);
                 (void)sds_q_del(sc->id);
-                return (NULL);
+                return NULL;
                 break;
             default:
                 err(EXIT_FAILURE, "connect");
         }
     }
-    return (sc);
+    return sc;
 }
 
     int
 sds_io_close(void *qe)
 {
     SDS_CONN *sc = (SDS_CONN *)qe;
-    return (close(sc->s));
+    return close(sc->s);
 }
 
     SDS_CONN *
@@ -190,16 +190,14 @@ sds_io_alloc(SDS_STATE *ss, SDS_PKT *pkt)
 
     if (sds_q_add(ss, sc) < 0) {
         free (sc);
-        return (NULL);
+        return NULL;
     }
 
-    return (sc);
+    return sc;
 }
 
     SDS_FWD *
 sds_io_forward(SDS_STATE *ss, SDS_PKT *pkt)
 {
-    return ( (pkt->sess.f.fwd < ss->fwds) ?
-            (ss->fwd + pkt->sess.f.fwd) :
-            ss->fwd);
+    return (pkt->sess.f.fwd < ss->fwds) ? (ss->fwd + pkt->sess.f.fwd) : ss->fwd;
 }

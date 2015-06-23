@@ -267,7 +267,7 @@ sdt_proxy_open(SDT_STATE *ss)
 
     (void)close(s);
 
-    return (cs);
+    return cs;
 }
 
 
@@ -432,7 +432,7 @@ sdt_read(SDT_STATE *ss, char *buf, size_t nbytes)
     if (ss->faststart > 0 && t <= KEYSTROKELEN)
         ss->faststart--;
 
-    return (t);
+    return t;
 }
 
     void
