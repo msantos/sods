@@ -62,7 +62,7 @@ parseip (char *buf, in_addr_t *network, in_addr_t *broadcast)
 
     free(ip);
 
-    return (0);
+    return 0;
 
 ERR:
     free(ip);
@@ -77,20 +77,20 @@ quad2hl(char *buf)
     int i = 0;
 
     if (buf == NULL)
-        return (0);
+        return 0;
 
     if (sscanf(buf, "%u.%u.%u.%u", &byte[0], &byte[1],
                 &byte[2], &byte[3]) != 4)
-        return (0);
+        return 0;
 
     for (i = 0; i < 4; i++)
         if (byte[i] > 255)
-            return (0);
+            return 0;
 
     for (i = 0; i < 4; i++)
         addr += byte[i] << (24 - i * 8);
 
-    return (addr);
+    return addr;
 }
 
     in_addr_t
@@ -100,18 +100,18 @@ mask2hl(char *buf)
     in_addr_t mask = 0;
 
     if (buf == NULL)
-        return (0);
+        return 0;
 
     if (sscanf(buf, "%u", &byte) != 1)
-        return (0);
+        return 0;
 
     if (byte > 32 || byte == 0)
-        return (0);
+        return 0;
 
     while (byte > 0) {
         mask = (mask >> 1) + 0x80000000;
         byte--;
     }
 
-    return (mask);
+    return mask;
 }
