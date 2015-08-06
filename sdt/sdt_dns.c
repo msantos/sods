@@ -356,6 +356,7 @@ sdt_dns_dec_NULL(SDT_STATE *ss, u_char *data, u_int16_t *n)
 
     if (*n < 0) {
         VERBOSE(0, "Invalid base64 encoded packet\n");
+        free(out);
         return NULL;
     }
 
