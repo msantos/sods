@@ -1,4 +1,4 @@
-/* Copyright (c) 2009-2015, Michael Santos <michael.santos@gmail.com>
+/* Copyright (c) 2009-2016, Michael Santos <michael.santos@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -108,7 +108,7 @@ sdt_dns_A(SDT_STATE *ss, char *buf, ssize_t n)
     nonce = (u_int16_t)sdt_arc4random(ss->rand);
 
     /* Base32 encode the buffer and lowercase the result */
-    if (base32_encode_length(n) >= sizeof(dn))
+    if ((size_t)base32_encode_length(n) >= sizeof(dn))
         errx(EXIT_FAILURE, "buffer overflow, biatch!");
 
     base32_encode_into(buf, n, dn);
@@ -145,7 +145,7 @@ sdt_dns_A(SDT_STATE *ss, char *buf, ssize_t n)
 }
 
     char *
-sdt_dns_poll(SDT_STATE *ss, size_t *len)
+sdt_dns_poll(SDT_STATE *ss, ssize_t *len)
 {
     char query[NS_MAXDNAME] = {0};
     char pkt[NS_PACKETSZ] = {0};
@@ -260,7 +260,7 @@ sdt_dns_dec_TXT(SDT_STATE *ss, u_char *data, u_int16_t *n)
     for ( ; p - dp < *n ; p += *p+1) {
         char *lf = NULL;
         char *out = NULL;
-        size_t outlen = 0;
+        int outlen = 0;
         size_t maxlen = 0;
 
         struct {
@@ -335,6 +335,7 @@ sdt_dns_dec_NULL(SDT_STATE *ss, u_char *data, u_int16_t *n)
     char *out = NULL;
     size_t outlen = 0;
     char *lf = NULL;
+    int len = 0;
 
     if (*data == 0)
         return NULL;
@@ -352,13 +353,15 @@ sdt_dns_dec_NULL(SDT_STATE *ss, u_char *data, u_int16_t *n)
     if (outlen >= NS_PACKETSZ)
         errx(EXIT_FAILURE, "buffer overflow v2, biatch!");
 
-    *n = b64_pton((char *)data, (u_char *)out, outlen);
+    len = b64_pton((char *)data, (u_char *)out, outlen);
 
-    if (*n < 0) {
+    if (len < 0) {
         VERBOSE(0, "Invalid base64 encoded packet\n");
         free(out);
         return NULL;
     }
+
+    *n = len;
 
     return out;
 }

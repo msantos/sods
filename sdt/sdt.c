@@ -1,4 +1,4 @@
-/* Copyright (c) 2009-2015, Michael Santos <michael.santos@gmail.com>
+/* Copyright (c) 2009-2016, Michael Santos <michael.santos@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -298,9 +298,9 @@ sdt_loop_poll(SDT_STATE *ss)
 sdt_send_poll(SDT_STATE *ss)
 {
     char *buf = NULL;
-    size_t len = 0;
-    size_t n = 0;
-    size_t t = 0;
+    ssize_t len = 0;
+    ssize_t n = 0;
+    ssize_t t = 0;
 
 
     buf = sdt_dns_poll(ss, &len);

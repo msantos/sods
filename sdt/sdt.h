@@ -1,4 +1,4 @@
-/* Copyright (c) 2009-2015, Michael Santos <michael.santos@gmail.com>
+/* Copyright (c) 2009-2016, Michael Santos <michael.santos@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -167,7 +167,7 @@ void sdt_dns_setopt(int opt, int val);
 int sdt_dns_setns(char *ns);
 int sdt_dns_parsens(SDT_STATE *ss, char *buf);
 int sdt_dns_A(SDT_STATE *ss, char *buf, ssize_t n);
-char *sdt_dns_poll(SDT_STATE *ss, size_t *len);
+char *sdt_dns_poll(SDT_STATE *ss, ssize_t *len);
 char *sdt_dns_parse(SDT_STATE *ss, char *pkt, int *pktlen);
 char *sdt_dns_dec_CNAME(SDT_STATE *ss, u_char *data, u_int16_t *n);
 char *sdt_dns_dec_TXT(SDT_STATE *ss, u_char *data, u_int16_t *n);
