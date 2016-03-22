@@ -1,4 +1,4 @@
-/* Copyright (c) 2009-2015, Michael Santos <michael.santos@gmail.com>
+/* Copyright (c) 2009-2016, Michael Santos <michael.santos@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -255,14 +255,14 @@ sds_dns_enc_CNAME(SDS_STATE *ss, SDS_PKT *pkt)
     char *cp = NULL;
     int i = 0;
     int j = 0;
-    ssize_t n = 0;
+    int n = 0;
 
     NULL_RESPONSE(pkt);
 
     IS_NULL(buf = calloc(sizeof(pkt->buf), 1));
 
     n = base32_encode_length(pkt->buflen); /* len includes NULL */
-    if (n + (n/NS_MAXLABEL + 1) + 1 >= sizeof(pkt->buf)) {
+    if (n < 0 || (size_t)(n + (n/NS_MAXLABEL + 1) + 1) >= sizeof(pkt->buf)) {
         VERBOSE(0, "buffer overflow, biatch!");
         free(buf);
         return -1;

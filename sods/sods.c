@@ -1,4 +1,4 @@
-/* Copyright (c) 2009-2015, Michael Santos <michael.santos@gmail.com>
+/* Copyright (c) 2009-2016, Michael Santos <michael.santos@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -164,7 +164,7 @@ sds_parse_forward(SDS_STATE *ss, char *buf)
     void
 sds_print_forward(SDS_STATE *ss)
 {
-    int i = 0;
+    u_int32_t i = 0;
     SDS_FWD *fw = NULL;
 
     (void)fprintf(stdout, "Forwarded sessions = %u\n", (u_int32_t)ss->fwds);
@@ -172,7 +172,7 @@ sds_print_forward(SDS_STATE *ss)
     for (i = 0; i < ss->fwds; i++) {
         fw = ss->fwd + i;
         (void)fprintf(stdout, "Forward #%u: %s:%u\n",
-                (u_int32_t)i, inet_ntoa(fw->sa.sin_addr),
+                i, inet_ntoa(fw->sa.sin_addr),
                 ntohs(fw->sa.sin_port));
     }
 }
