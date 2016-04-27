@@ -105,13 +105,6 @@ void base32_encode_into(const void *_buffer, unsigned int bufLen, char *base32Bu
     *base32Buffer = 0;
 }
 
-char *base32_encode(const void *buf, unsigned int len)
-{
-    char *tmp = malloc(base32_encode_length(len));
-    base32_encode_into(buf, len, tmp);
-    return tmp;
-}
-
 int base32_decode_into(const char *base32Buffer, unsigned int base32BufLen, void *_buffer)
 {
     int i, index, max, lookup, offset;
@@ -156,14 +149,3 @@ int base32_decode_into(const char *base32Buffer, unsigned int base32BufLen, void
     }
     return offset;
 }
-
-void *base32_decode(const char *buf, unsigned int *outlen)
-{
-    unsigned int len = strlen(buf);
-    char *tmp = malloc(base32_decode_length(len));
-    unsigned int x = base32_decode_into(buf, len, tmp);
-    if(outlen)
-        *outlen = x;
-    return tmp;
-}
-
