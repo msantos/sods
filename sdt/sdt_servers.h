@@ -22,13 +22,16 @@ typedef struct _SDT_SERV  {
 
 static SDS_SERV dnsserv[] = {
     {"opendns", "resolver1.opendns.com", "208.67.222.222"},
-    {"opendns", "resolver2.opendns.com", "208.67.222.220"},
+    {"opendns", "resolver2.opendns.com", "208.67.220.220"},
+    {"opendns", "resolver3.opendns.com", "208.67.222.220"},
+    {"opendns", "resolver4.opendns.com", "208.67.220.222"},
 
-    {"verizon", "vnsc-bak.sys.gtei.net", "4.2.2.2"},
-    {"verizon", "vnsc-lc.sys.gtei.net", "4.2.2.3"},
-    {"verizon", "vnsc-pri-dsl.genuity.net", "4.2.2.4"},
-    {"verizon", "vnsc-bak-dsl.genuity.net", "4.2.2.5"},
-    {"verizon", "vnsc-lc-dsl.genuity.net", "4.2.2.6"},
+    {"level3", "a.resolvers.Level3.net", "4.2.2.1"},
+    {"level3", "b.resolvers.Level3.net", "4.2.2.2"},
+    {"level3", "c.resolvers.level3.net", "4.2.2.3"},
+    {"level3", "d.resolvers.level3.net", "4.2.2.4"},
+    {"level3", "e.resolvers.level3.net", "4.2.2.5"},
+    {"level3", "f.resolvers.level3.net", "4.2.2.6"},
 
     {"speakeasy", "Atlanta", "216.27.175.2"},
     {"speakeasy", "Boston", "66.92.64.2"},

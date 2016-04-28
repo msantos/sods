@@ -492,7 +492,7 @@ usage(SDT_STATE *ss)
     (void)fprintf(stderr, "-n <roundrobin|random>   Strategy for shuffling domain names [default: roundrobin]\n");
     (void)fprintf(stderr, "-p <port>                proxy port, listen on a TCP port instead of using stdin/stdout\n");
     (void)fprintf(stderr, "-R <number>              Number of retries for lookup\n");
-    (void)fprintf(stderr, "-r <namserver>           Nameserver (or keyword: random, opendns, verizon, speakeasy, google)\n");
+    (void)fprintf(stderr, "-r <namserver>           Nameserver (or keyword: random, opendns, level3, speakeasy, google)\n");
     (void)fprintf(stderr, "-S [rotate|blast]        Resolver strategy\n");
     (void)fprintf(stderr, "-s <number>              Forward session\n");
     (void)fprintf(stderr, "-T <number>              Use TCP [0 = new connection for each request, 1 = pipeline requests]\n");
