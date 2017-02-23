@@ -290,7 +290,7 @@ sdt_dns_dec_TXT(SDT_STATE *ss, u_char *data, u_int16_t *n)
             errx(EXIT_FAILURE, "buffer overflow v2, biatch!");
 
         outlen = b64_pton(rec.data, (u_char *)out, maxlen);
-        if (outlen < 0) {
+        if (outlen <= 0) {
             VERBOSE(0, "Invalid base64 encoded packet\n");
             free(buf);
             free(out);
@@ -355,7 +355,7 @@ sdt_dns_dec_NULL(SDT_STATE *ss, u_char *data, u_int16_t *n)
 
     len = b64_pton((char *)data, (u_char *)out, outlen);
 
-    if (len < 0) {
+    if (len <= 0) {
         VERBOSE(0, "Invalid base64 encoded packet\n");
         free(out);
         return NULL;
