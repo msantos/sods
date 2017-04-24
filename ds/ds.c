@@ -1,4 +1,4 @@
-/* Copyright (c) 2009-2015, Michael Santos <michael.santos@gmail.com>
+/* Copyright (c) 2009-2017, Michael Santos <michael.santos@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -110,6 +110,8 @@ struct dns_answer {
 void ds_reader(DS_STATE *ds);
 void ds_writer(DS_STATE *ds);
 void wakeup(int sig);
+static long long ds_strtonum(DS_STATE *ds, const char *nptr, long long minval,
+        long long maxval);
 void usage(DS_STATE *ds);
 
 int woken = 0;
@@ -134,10 +136,10 @@ main (int argc, char *argv[])
                 ds->queryhost = optarg;
                 break;
             case 'l':
-                ds->port.local = (in_port_t)atoi(optarg);
+                ds->port.local = ds_strtonum(ds, optarg, 0, 0xfffe);
                 break;
             case 'p':
-                ds->port.remote = (in_port_t)atoi(optarg);
+                ds->port.remote = ds_strtonum(ds, optarg, 0, 0xfffe);
                 break;
             case 'v':
                 ds->verbose++;
@@ -284,6 +286,19 @@ wakeup (int sig)
         default:
             break;
     }
+}
+
+    static long long
+ds_strtonum(DS_STATE *ds, const char *nptr, long long minval, long long maxval)
+{
+    long long n = 0;
+    const char *errstr = NULL;
+
+    n = strtonum(nptr, minval, maxval, &errstr);
+    if (errstr)
+        errx(EXIT_FAILURE, "%s: %s", errstr, nptr);
+
+    return n;
 }
 
 void
