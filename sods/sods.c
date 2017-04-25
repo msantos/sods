@@ -1,4 +1,4 @@
-/* Copyright (c) 2009-2016, Michael Santos <michael.santos@gmail.com>
+/* Copyright (c) 2009-2017, Michael Santos <michael.santos@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -21,6 +21,9 @@
 
 int sds_parse_forward(SDS_STATE *ss, char *buf);
 void sds_print_forward(SDS_STATE *ss);
+
+static long long sds_strtonum(SDS_STATE *ss, const char *nptr,
+	long long minval, long long maxval);
 
     int
 main (int argc, char *argv[])
@@ -50,7 +53,7 @@ main (int argc, char *argv[])
     while ( (ch = getopt(argc, argv, "c:Dd:g:hi:L:p:u:vx:")) != -1) {
         switch (ch) {
             case 'c':
-                ss->maxconn = (u_int32_t)atoi(optarg);
+                ss->maxconn = sds_strtonum(ss, optarg, 0, UINT_MAX);
                 break;
             case 'D':   /* daemonize */
                 ss->daemon = 1;
@@ -74,7 +77,8 @@ main (int argc, char *argv[])
                 }
                 break;
             case 'p':
-                ss->local.sin_port = htons((in_port_t)atoi(optarg));
+                ss->local.sin_port = htons(sds_strtonum(ss, optarg,
+                            0, 0xfffe));
                 break;
             case 'u':
                 IS_NULL(ss->proc.user = strdup(optarg));
@@ -83,7 +87,7 @@ main (int argc, char *argv[])
                 ss->verbose++;
                 break;
             case 'x':
-                ss->maxtimeout = (u_int32_t)atoi(optarg);
+                ss->maxtimeout = sds_strtonum(ss, optarg, 0, UINT_MAX);
                 break;
             case 'h':
             default:
@@ -154,7 +158,7 @@ sds_parse_forward(SDS_STATE *ss, char *buf)
 
     (void)memset(&fw->sa, 0, sizeof(struct sockaddr_in));
     (void)memcpy(&fw->sa.sin_addr, he->h_addr_list[0], sizeof(fw->sa.sin_addr));
-    fw->sa.sin_port = htons((in_port_t)atoi(port));
+    fw->sa.sin_port = htons(sds_strtonum(ss, port, 0, 0xfffe));
 
     ss->fwds++;
     free(dst);
@@ -197,6 +201,20 @@ sds_timestamp(void)
     }
 
     (void)fprintf(stderr, "%s", outstr);
+}
+
+    static long long
+sds_strtonum(SDS_STATE *ss, const char *nptr, long long minval,
+        long long maxval)
+{
+    long long n = 0;
+    const char *errstr = NULL;
+
+    n = strtonum(nptr, minval, maxval, &errstr);
+    if (errstr)
+        errx(EXIT_FAILURE, "%s: %s", errstr, nptr);
+
+    return n;
 }
 
     void

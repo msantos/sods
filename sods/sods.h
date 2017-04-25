@@ -254,3 +254,8 @@ void sds_errx(int rv, char *fmt, ...);
 void sds_warn(char *fmt, ...);
 void sds_warnx(char *fmt, ...);
 #endif /* HAVE_ERRX */
+
+#ifndef HAVE_STRTONUM
+long long strtonum(const char *numstr, long long minval, long long maxval,
+        const char **errstrp);
+#endif
