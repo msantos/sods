@@ -1,4 +1,4 @@
-/* Copyright (c) 2009-2016, Michael Santos <michael.santos@gmail.com>
+/* Copyright (c) 2009-2018, Michael Santos <michael.santos@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -26,6 +26,9 @@
 #include "sdt.h"
 
 extern char *__progname;
+
+static long long sdt_strtonum(const char *nptr, long long minval,
+    long long maxval);
 
 int woken = 0;
 int forcesend = 0;
@@ -66,13 +69,13 @@ main(int argc, char *argv[])
     while ( (ch = getopt(argc, argv, "A:B:b:D:dF:hM:m:n:p:R:r:S:s:T:t:V:vx:")) != -1) {
         switch (ch) {
             case 'A':	/* alarm, delay buf */
-                ss->delay = (u_int32_t)atoi(optarg);
+                ss->delay = sdt_strtonum(optarg, 0, INT32_MAX);
                 break;
             case 'B':   /* send buf size */
-                ss->bufsz = (size_t)atoi(optarg);
+                ss->bufsz = sdt_strtonum(optarg, 0, INT32_MAX);
                 break;
             case 'b':   /* max backoff */
-                ss->maxbackoff = (u_int16_t)atoi(optarg);
+                ss->maxbackoff = sdt_strtonum(optarg, 0, INT16_MAX);
                 break;
             case 'D': { /* Dynamic forward */
                 char *hostname = NULL;
@@ -86,13 +89,14 @@ main(int argc, char *argv[])
                 sdt_dns_setopt(SDT_RES_DEBUG, 1);
                 break;
             case 'F':   /* fast start */
-                ss->faststart = (int32_t)atoi(optarg);
+                ss->faststart = sdt_strtonum(optarg, 0, INT32_MAX);
                 break;
             case 'M':
-                ss->maxpollfail = (int32_t)atoi(optarg);
+                ss->maxpollfail = sdt_strtonum(optarg, 0, INT32_MAX);
+                break;
                 break;
             case 'm':
-                ss->sleep = (u_int32_t)atoi(optarg);
+                ss->sleep = sdt_strtonum(optarg, 0, INT32_MAX);
                 break;
             case 'n':   /* strategy for shuffling domain name list */
                 if (strcasecmp(optarg, "roundrobin") == 0)
@@ -103,10 +107,11 @@ main(int argc, char *argv[])
                     usage(ss);
                 break;
             case 'p':   /* Proxy mode */
-                ss->proxy_port = (in_port_t)atoi(optarg);
+                ss->proxy_port = sdt_strtonum(optarg, 0, UINT16_MAX-1);
                 break;
             case 'R':   /* Retry lookup */
-                sdt_dns_setopt(SDT_RES_RETRY, (u_int32_t)atoi(optarg));
+                sdt_dns_setopt(SDT_RES_RETRY,
+                    sdt_strtonum(optarg, 0, INT32_MAX));
                 break;
             case 'r':
                 if (sdt_dns_parsens(ss, optarg) < 0)
@@ -123,10 +128,11 @@ main(int argc, char *argv[])
                     usage(ss);
                 break;
             case 's':   /* forwarded session */
-                ss->sess.o.fwd = (u_int8_t)atoi(optarg);
+                ss->sess.o.fwd = sdt_strtonum(optarg, 0, 255);
                 break;
             case 'T':
-                sdt_dns_setopt(SDT_RES_USEVC, (int32_t)atoi(optarg));
+                sdt_dns_setopt(SDT_RES_USEVC,
+                    sdt_strtonum(optarg, 0, INT32_MAX));
                 break;
             case 't':   /* DNS message type */
                 if (strcasecmp(optarg, "TXT") == 0)
@@ -139,13 +145,14 @@ main(int argc, char *argv[])
                     usage(ss);
                 break;
             case 'V':
-                ss->verbose_lines = atoi(optarg);
+                ss->verbose_lines = sdt_strtonum(optarg, 0, INT16_MAX);
                 break;
             case 'v':
                 ss->verbose++;
                 break;
             case 'x':   /* Transmit lookup timeout */
-                sdt_dns_setopt(SDT_RES_RETRANS, (int32_t)atoi(optarg));
+                sdt_dns_setopt(SDT_RES_RETRANS,
+                    sdt_strtonum(optarg, 0, INT32_MAX));
                 break;
 
             case 'h':
@@ -224,7 +231,7 @@ sdt_parse_forward(SDT_STATE *ss, char *host)
 
     if ( (port = strchr(host, ':')) != NULL) {
         *port++ = '\0';
-        ss->target_port = atoi(port);
+        ss->target_port = sdt_strtonum(optarg, 0, UINT16_MAX-1);
     }
 
     if ( (he = gethostbyname(host)) == NULL)
@@ -449,6 +456,19 @@ sdt_send_A(SDT_STATE *ss, char *buf, ssize_t n)
     (void)kill(ss->child, SIGUSR1);
 }
 
+    static long long
+sdt_strtonum(const char *nptr, long long minval,
+        long long maxval)
+{
+    long long n = 0;
+    const char *errstr = NULL;
+
+    n = strtonum(nptr, minval, maxval, &errstr);
+    if (errstr)
+        errx(EXIT_FAILURE, "%s: %s", errstr, nptr);
+
+    return n;
+}
 
     void
 sdt_alarm(SDT_STATE *ss)

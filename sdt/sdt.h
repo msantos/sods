@@ -192,3 +192,8 @@ void sdt_errx(int rv, char *fmt, ...);
 void sdt_warn(char *fmt, ...);
 void sdt_warnx(char *fmt, ...);
 #endif /* HAVE_ERRX */
+
+#ifndef HAVE_STRTONUM
+long long strtonum(const char *numstr, long long minval, long long maxval,
+            const char **errstrp);
+#endif

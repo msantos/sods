@@ -52,7 +52,9 @@ LIB=${LIB}
 
 all:
 	\$(CC) \$(DEF) -g -Wall -o sods sods.c sods_handler.c sods_dns.c sods_io.c \
-        sods_q.c sods_sock.c sods_priv.c sods_err.c base32.c \$(LIB)
+        sods_q.c sods_sock.c sods_priv.c sods_err.c base32.c \
+        ../common/strtonum.c \
+        \$(LIB)
 
 clean:
 	-@\$(RM) sods *.o

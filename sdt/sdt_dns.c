@@ -393,8 +393,12 @@ sdt_dns_parsens(SDT_STATE *ss, char *buf)
     }
 
     if ( (p = strchr(serv, ':')) != NULL) {
+        const char *errstr = NULL;
+
         *p++ = '\0';
-        ns = atoi(p);
+        ns = strtonum(p, 0, MAXNS, &errstr);
+        if (errstr)
+            err(EXIT_FAILURE, "%s: %s", errstr, p);
     }
 
     for (ds = dnsserv; ds->name && i < MAXNS; ds++) {
