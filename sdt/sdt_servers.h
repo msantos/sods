@@ -14,10 +14,10 @@
  */
 
 /* Publicly available recursive servers */
-typedef struct _SDT_SERV  {
-    char *name;
-    char *descr;
-    char *addr;
+typedef struct _SDT_SERV {
+  char *name;
+  char *descr;
+  char *addr;
 } SDS_SERV;
 
 static SDS_SERV dnsserv[] = {
@@ -49,5 +49,4 @@ static SDS_SERV dnsserv[] = {
     {"google", "google-public-dns-a.google.com", "8.8.8.8"},
     {"google", "google-public-dns-b.google.com", "8.8.4.4"},
 
-    {NULL, NULL, NULL}
-};
+    {NULL, NULL, NULL}};

@@ -19,55 +19,47 @@
 
 extern char *__progname;
 
-    void
-sdt_err(int rv, char *fmt, ...)
-{
-    va_list ap;
+void sdt_err(int rv, char *fmt, ...) {
+  va_list ap;
 
-    (void)fprintf(stderr, "%s: ", __progname);
-    va_start(ap, fmt);
-    (void)vfprintf(stderr, fmt, ap);
-    va_end(ap);
-    (void)fprintf(stderr, ": %s\n", strerror(errno));
+  (void)fprintf(stderr, "%s: ", __progname);
+  va_start(ap, fmt);
+  (void)vfprintf(stderr, fmt, ap);
+  va_end(ap);
+  (void)fprintf(stderr, ": %s\n", strerror(errno));
 
-    exit (rv);
+  exit(rv);
 }
 
-    void
-sdt_errx(int rv, char *fmt, ...)
-{
-    va_list ap;
+void sdt_errx(int rv, char *fmt, ...) {
+  va_list ap;
 
-    (void)fprintf(stderr, "%s: ", __progname);
-    va_start(ap, fmt);
-    vfprintf(stderr, fmt, ap);
-    va_end(ap);
-    (void)fprintf(stderr, "\n");
+  (void)fprintf(stderr, "%s: ", __progname);
+  va_start(ap, fmt);
+  vfprintf(stderr, fmt, ap);
+  va_end(ap);
+  (void)fprintf(stderr, "\n");
 
-    exit (rv);
+  exit(rv);
 }
 
-    void
-sdt_warn(char *fmt, ...)
-{
-    va_list ap;
+void sdt_warn(char *fmt, ...) {
+  va_list ap;
 
-    (void)fprintf(stderr, "%s: ", __progname);
-    va_start(ap, fmt);
-    (void)vfprintf(stderr, fmt, ap);
-    va_end(ap);
-    (void)fprintf(stderr, ": %s\n", strerror(errno));
+  (void)fprintf(stderr, "%s: ", __progname);
+  va_start(ap, fmt);
+  (void)vfprintf(stderr, fmt, ap);
+  va_end(ap);
+  (void)fprintf(stderr, ": %s\n", strerror(errno));
 }
 
-    void
-sdt_warnx(char *fmt, ...)
-{
-    va_list ap;
+void sdt_warnx(char *fmt, ...) {
+  va_list ap;
 
-    (void)fprintf(stderr, "%s: ", __progname);
-    va_start(ap, fmt);
-    vfprintf(stderr, fmt, ap);
-    va_end(ap);
-    (void)fprintf(stderr, "\n");
+  (void)fprintf(stderr, "%s: ", __progname);
+  va_start(ap, fmt);
+  vfprintf(stderr, fmt, ap);
+  va_end(ap);
+  (void)fprintf(stderr, "\n");
 }
 #endif /* ! HAVE_ERRX */

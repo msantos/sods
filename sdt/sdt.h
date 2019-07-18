@@ -12,145 +12,141 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <string.h>
 #include <time.h>
-#include <errno.h>
+#include <unistd.h>
 
 #include <arpa/nameser.h>
 
+#include <arpa/inet.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
-#include <arpa/inet.h>
 
 #include <netdb.h>
 
-
-#define SDT_VERSION     "0.12.0"
+#define SDT_VERSION "0.12.0"
 
 #ifdef HAVE_ERRX
 #include <err.h>
 #else
-#define err     sdt_err
-#define errx    sdt_errx
-#define warn    sdt_warn
-#define warnx   sdt_warnx
+#define err sdt_err
+#define errx sdt_errx
+#define warn sdt_warn
+#define warnx sdt_warnx
 #endif /* HAVE_ERRX */
 
-#define IS_ERR(x) do { \
-    if ((x) == -1) { \
-        err(EXIT_FAILURE, "%s", #x); \
-    } \
-} while (0)
+#define IS_ERR(x)                                                              \
+  do {                                                                         \
+    if ((x) == -1) {                                                           \
+      err(EXIT_FAILURE, "%s", #x);                                             \
+    }                                                                          \
+  } while (0)
 
-#define IS_NULL(x) do { \
-    if ((x) == NULL) { \
-        err(EXIT_FAILURE, "%s", #x); \
-    } \
-} while (0)
+#define IS_NULL(x)                                                             \
+  do {                                                                         \
+    if ((x) == NULL) {                                                         \
+      err(EXIT_FAILURE, "%s", #x);                                             \
+    }                                                                          \
+  } while (0)
 
-#define TIMESTAMP() do { \
-           char outstr[200]; \
-           time_t t; \
-           struct tm *tmp; \
- \
-           t = time(NULL); \
-           tmp = localtime(&t); \
-           if (tmp == NULL) { \
-               perror("localtime"); \
-               exit(EXIT_FAILURE); \
-           } \
- \
-           if (strftime(outstr, sizeof(outstr), "%Y-%m-%d %H:%M:%S ", tmp) == 0) { \
-               (void)fprintf(stderr, "strftime returned 0"); \
-               exit(EXIT_FAILURE); \
-           } \
- \
-           (void)fprintf(stderr, "%s", outstr); \
-} while (0)
+#define TIMESTAMP()                                                            \
+  do {                                                                         \
+    char outstr[200];                                                          \
+    time_t t;                                                                  \
+    struct tm *tmp;                                                            \
+                                                                               \
+    t = time(NULL);                                                            \
+    tmp = localtime(&t);                                                       \
+    if (tmp == NULL) {                                                         \
+      perror("localtime");                                                     \
+      exit(EXIT_FAILURE);                                                      \
+    }                                                                          \
+                                                                               \
+    if (strftime(outstr, sizeof(outstr), "%Y-%m-%d %H:%M:%S ", tmp) == 0) {    \
+      (void)fprintf(stderr, "strftime returned 0");                            \
+      exit(EXIT_FAILURE);                                                      \
+    }                                                                          \
+                                                                               \
+    (void)fprintf(stderr, "%s", outstr);                                       \
+  } while (0)
 
+#define VERBOSE(x, ...)                                                        \
+  do {                                                                         \
+    if (ss->verbose_lines == 0) {                                              \
+      break;                                                                   \
+    }                                                                          \
+    ss->verbose_lines--;                                                       \
+    if (ss->verbose >= 4) {                                                    \
+      TIMESTAMP();                                                             \
+    }                                                                          \
+    if (ss->verbose >= x) {                                                    \
+      (void)fprintf(stderr, __VA_ARGS__);                                      \
+    }                                                                          \
+  } while (0)
 
-#define VERBOSE(x, ...) do { \
-    if (ss->verbose_lines == 0) { \
-        break; \
-    } \
-    ss->verbose_lines--; \
-    if (ss->verbose >= 4) { \
-        TIMESTAMP(); \
-    } \
-    if (ss->verbose >= x) { \
-        (void)fprintf (stderr, __VA_ARGS__); \
-    } \
-} while (0)
+#define MAXBUF                                                                 \
+  47 /* MIME has a maximum line length of 76 bytes:                            \
+        76 * 5 / 8 =  47 bytes */
 
-#define MAXBUF      47      /* MIME has a maximum line length of 76 bytes:
-                               76 * 5 / 8 =  47 bytes */
+#define SLEEP_TXT 20000 /* microseconds */
+#define MAXBACKOFF 3000 /* 3000 * 20000  = 60,000,000 (1/minute) */
+#define MAXPOLLFAIL 10  /* Number of TXT record failures before giving up */
 
-#define SLEEP_TXT   20000   /* microseconds */
-#define MAXBACKOFF  3000    /* 3000 * 20000  = 60,000,000 (1/minute) */
-#define MAXPOLLFAIL  10      /* Number of TXT record failures before giving up */
-
-#define MAXDNAMELIST 256    /* arbitrary cutoff for number of domains */
-
+#define MAXDNAMELIST 256 /* arbitrary cutoff for number of domains */
 
 typedef union _SDT_ID {
-    struct {
-        u_int32_t opt:8,
-                  fwd:8,
-                  id:16;
-    } o;
-    u_int32_t id;
+  struct {
+    u_int32_t opt : 8, fwd : 8, id : 16;
+  } o;
+  u_int32_t id;
 } SDT_ID;
 
 typedef struct SDT_STATE {
-    char        **dname;
-    int         dname_max;
-    int         dname_iterator;
-    SDT_ID      sess;
-    size_t      sum;
-    size_t      sum_up;
-    size_t      bufsz;
-    u_int16_t   backoff;
-    u_int16_t   maxbackoff;
-    u_int32_t   sleep;
-    u_int32_t   type;
-    int32_t     delay;
-    int32_t   	faststart;
-    int32_t   	pollfail;
-    int32_t   	maxpollfail;
-    pid_t       child;
-    int         verbose;
-    int         verbose_lines;
-    int         rand;
+  char **dname;
+  int dname_max;
+  int dname_iterator;
+  SDT_ID sess;
+  size_t sum;
+  size_t sum_up;
+  size_t bufsz;
+  u_int16_t backoff;
+  u_int16_t maxbackoff;
+  u_int32_t sleep;
+  u_int32_t type;
+  int32_t delay;
+  int32_t faststart;
+  int32_t pollfail;
+  int32_t maxpollfail;
+  pid_t child;
+  int verbose;
+  int verbose_lines;
+  int rand;
 
-    in_port_t   proxy_port;
-    int         fd_in;
-    int         fd_out;
+  in_port_t proxy_port;
+  int fd_in;
+  int fd_out;
 
-    int         protocol;
-    char        *target;
-    in_port_t   target_port;
+  int protocol;
+  char *target;
+  in_port_t target_port;
 
-    char *(*dname_next)(struct SDT_STATE *state);
+  char *(*dname_next)(struct SDT_STATE *state);
 } SDT_STATE;
 
 /* Protocol version */
-enum {
-    PROTO_OZYMANDNS,
-    PROTO_STATIC_FWD,
-    PROTO_DYN_FWD
-};
+enum { PROTO_OZYMANDNS, PROTO_STATIC_FWD, PROTO_DYN_FWD };
 
 /* Resolver options */
 enum {
-    SDT_RES_RETRANS,        /* Resolver timeout */
-    SDT_RES_RETRY,          /* Number of times to retry lookup */
-    SDT_RES_USEVC,          /* Use TCP for lookup */
-    SDT_RES_ROTATE,         /* Rotate through available nameservers */
-    SDT_RES_BLAST,          /* Query all nameservers */
-    SDT_RES_DEBUG,          /* Enable resolver debugging */
+  SDT_RES_RETRANS, /* Resolver timeout */
+  SDT_RES_RETRY,   /* Number of times to retry lookup */
+  SDT_RES_USEVC,   /* Use TCP for lookup */
+  SDT_RES_ROTATE,  /* Rotate through available nameservers */
+  SDT_RES_BLAST,   /* Query all nameservers */
+  SDT_RES_DEBUG,   /* Enable resolver debugging */
 };
 
 void sdt_parse_forward(SDT_STATE *ss, char *host);
@@ -176,7 +172,6 @@ void sdt_dns_print_servers(SDT_STATE *ss);
 char *sdt_dns_dn_roundrobin(SDT_STATE *ss);
 char *sdt_dns_dn_random(SDT_STATE *ss);
 
-
 int sdt_rand_init(void);
 u_int32_t sdt_arc4random(int);
 #ifndef HAVE_ARC4RANDOM
@@ -195,5 +190,5 @@ void sdt_warnx(char *fmt, ...);
 
 #ifndef HAVE_STRTONUM
 long long strtonum(const char *numstr, long long minval, long long maxval,
-            const char **errstrp);
+                   const char **errstrp);
 #endif

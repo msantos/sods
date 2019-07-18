@@ -17,63 +17,57 @@
 #include <time.h>
 
 #ifdef HAVE_URANDOM
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #endif /* HAVE_URANDOM */
 #endif /* ! HAVE_ARC4RANDOM */
 
 #include "sdt.h"
 
-    uint32_t
-sdt_arc4random(int fd)
-{
+uint32_t sdt_arc4random(int fd) {
 #ifdef HAVE_ARC4RANDOM
-    (void)fd;
-    return arc4random();
+  (void)fd;
+  return arc4random();
 #elif defined(HAVE_URANDOM)
-    return sdt_rand(fd);
+  return sdt_rand(fd);
 #else
-    (void)fd;
-    return random();
+  (void)fd;
+  return random();
 #endif
 }
 
-    int
-sdt_rand_init(void)
-{
-    int fd = -2;
+int sdt_rand_init(void) {
+  int fd = -2;
 
 #ifdef HAVE_ARC4RANDOM
-    /* Nothing to do */
+/* Nothing to do */
 #elif defined(HAVE_URANDOM)
-    fd = open("/dev/urandom", O_RDONLY);
+  fd = open("/dev/urandom", O_RDONLY);
 
-    if (fd < 0)
-        err(EXIT_FAILURE, "open(/dev/urandom)");
+  if (fd < 0)
+    err(EXIT_FAILURE, "open(/dev/urandom)");
 
-    return fd;
+  return fd;
 #else
-    struct timeval tv;
+  struct timeval tv;
 
-    IS_ERR(gettimeofday(&tv, NULL));
-    srandom(getpid() ^ ~getuid() ^ tv.tv_sec ^ tv.tv_usec);
+  IS_ERR(gettimeofday(&tv, NULL));
+  srandom(getpid() ^ ~getuid() ^ tv.tv_sec ^ tv.tv_usec);
 #endif
 
-    return fd;
+  return fd;
 }
 
 #ifndef HAVE_ARC4RANDOM
 #ifdef HAVE_URANDOM
-    u_int32_t
-sdt_rand(int fd)
-{
-    u_int32_t rnd = 0;
+u_int32_t sdt_rand(int fd) {
+  u_int32_t rnd = 0;
 
-    if (read(fd, &rnd, sizeof(rnd)) != sizeof(rnd))
-        err(EXIT_FAILURE, "read(/dev/urandom)");
+  if (read(fd, &rnd, sizeof(rnd)) != sizeof(rnd))
+    err(EXIT_FAILURE, "read(/dev/urandom)");
 
-    return rnd;
+  return rnd;
 }
 #endif /* HAVE_URANDOM */
 #endif /* ! HAVE_ARC4RANDOM */

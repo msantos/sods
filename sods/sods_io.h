@@ -12,8 +12,8 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
-#include <unistd.h>
 #include <fcntl.h>
+#include <unistd.h>
 
-SDS_CONN * sds_io_open(SDS_STATE *ss, SDS_PKT *pkt);
-SDS_CONN * sds_io_alloc(SDS_STATE *ss, SDS_PKT *pkt);
+SDS_CONN *sds_io_open(SDS_STATE *ss, SDS_PKT *pkt);
+SDS_CONN *sds_io_alloc(SDS_STATE *ss, SDS_PKT *pkt);

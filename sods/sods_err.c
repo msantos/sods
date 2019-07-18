@@ -18,56 +18,47 @@
 
 #include "sods.h"
 
+void sds_err(int rv, char *fmt, ...) {
+  va_list ap;
 
-    void
-sds_err(int rv, char *fmt, ...)
-{
-    va_list ap;
+  (void)fprintf(stderr, "%s: ", SDS_PROGNAME);
+  va_start(ap, fmt);
+  (void)vfprintf(stderr, fmt, ap);
+  va_end(ap);
+  (void)fprintf(stderr, ": %s\n", strerror(errno));
 
-    (void)fprintf(stderr, "%s: ", SDS_PROGNAME);
-    va_start(ap, fmt);
-    (void)vfprintf(stderr, fmt, ap);
-    va_end(ap);
-    (void)fprintf(stderr, ": %s\n", strerror(errno));
-
-    exit (rv);
+  exit(rv);
 }
 
-    void
-sds_errx(int rv, char *fmt, ...)
-{
-    va_list ap;
+void sds_errx(int rv, char *fmt, ...) {
+  va_list ap;
 
-    (void)fprintf(stderr, "%s: ", SDS_PROGNAME);
-    va_start(ap, fmt);
-    vfprintf(stderr, fmt, ap);
-    va_end(ap);
-    (void)fprintf(stderr, "\n");
+  (void)fprintf(stderr, "%s: ", SDS_PROGNAME);
+  va_start(ap, fmt);
+  vfprintf(stderr, fmt, ap);
+  va_end(ap);
+  (void)fprintf(stderr, "\n");
 
-    exit (rv);
+  exit(rv);
 }
 
-    void
-sds_warn(char *fmt, ...)
-{
-    va_list ap;
+void sds_warn(char *fmt, ...) {
+  va_list ap;
 
-    (void)fprintf(stderr, "%s: ", SDS_PROGNAME);
-    va_start(ap, fmt);
-    (void)vfprintf(stderr, fmt, ap);
-    va_end(ap);
-    (void)fprintf(stderr, ": %s\n", strerror(errno));
+  (void)fprintf(stderr, "%s: ", SDS_PROGNAME);
+  va_start(ap, fmt);
+  (void)vfprintf(stderr, fmt, ap);
+  va_end(ap);
+  (void)fprintf(stderr, ": %s\n", strerror(errno));
 }
 
-    void
-sds_warnx(char *fmt, ...)
-{
-    va_list ap;
+void sds_warnx(char *fmt, ...) {
+  va_list ap;
 
-    (void)fprintf(stderr, "%s: ", SDS_PROGNAME);
-    va_start(ap, fmt);
-    vfprintf(stderr, fmt, ap);
-    va_end(ap);
-    (void)fprintf(stderr, "\n");
+  (void)fprintf(stderr, "%s: ", SDS_PROGNAME);
+  va_start(ap, fmt);
+  vfprintf(stderr, fmt, ap);
+  va_end(ap);
+  (void)fprintf(stderr, "\n");
 }
 #endif /* ! HAVE_ERRX */
