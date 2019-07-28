@@ -60,7 +60,13 @@ DEF=${DEF}
 LIB=${LIB}
 
 all:
-	\$(CC) \$(DEF) -g -Wall \$(LIB) -o \$(APP) \$(APP).c \$(APP)_dns.c \$(APP)_err.c \$(APP)_rand.c base32.c ../common/strtonum.c \$(STATIC_LIB)
+	\$(CC) \$(DEF) -g -Wall \$(LIB) \\
+    -Wall -Wextra -pedantic \\
+    -pie -fPIE \\
+    -Wshadow -Wpointer-arith -Wcast-qual \\
+    -Wstrict-prototypes -Wmissing-prototypes \\
+    -o \$(APP) \$(APP).c \$(APP)_dns.c \$(APP)_err.c \$(APP)_rand.c base32.c ../common/strtonum.c \$(STATIC_LIB) \\
+    -Wl,-z,relro,-z,now -Wl,-z,noexecstack
 
 clean:
 	-@\$(RM) *.o \$(APP)
