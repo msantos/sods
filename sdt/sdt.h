@@ -54,23 +54,23 @@
 
 #define TIMESTAMP()                                                            \
   do {                                                                         \
-    char outstr[200];                                                          \
-    time_t t;                                                                  \
-    struct tm *tmp;                                                            \
+    char _outstr[200];                                                         \
+    time_t _t;                                                                 \
+    struct tm *_tmp;                                                           \
                                                                                \
-    t = time(NULL);                                                            \
-    tmp = localtime(&t);                                                       \
-    if (tmp == NULL) {                                                         \
+    _t = time(NULL);                                                           \
+    _tmp = localtime(&_t);                                                     \
+    if (_tmp == NULL) {                                                        \
       perror("localtime");                                                     \
       exit(EXIT_FAILURE);                                                      \
     }                                                                          \
                                                                                \
-    if (strftime(outstr, sizeof(outstr), "%Y-%m-%d %H:%M:%S ", tmp) == 0) {    \
+    if (strftime(_outstr, sizeof(_outstr), "%Y-%m-%d %H:%M:%S ", _tmp) == 0) { \
       (void)fprintf(stderr, "strftime returned 0");                            \
       exit(EXIT_FAILURE);                                                      \
     }                                                                          \
                                                                                \
-    (void)fprintf(stderr, "%s", outstr);                                       \
+    (void)fprintf(stderr, "%s", _outstr);                                      \
   } while (0)
 
 #define VERBOSE(x, ...)                                                        \
