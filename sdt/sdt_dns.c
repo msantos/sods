@@ -222,13 +222,13 @@ char *sdt_dns_parse(SDT_STATE *ss, char *pkt, int *pktlen) {
 
   switch (type) {
   case ns_t_txt:
-    buf = sdt_dns_dec_TXT(ss, (u_char *)ns_rr_rdata(rr), &rrlen);
+    buf = sdt_dns_dec_TXT(ss, (const u_char *)ns_rr_rdata(rr), &rrlen);
     break;
   case ns_t_cname:
-    buf = sdt_dns_dec_CNAME(ss, (u_char *)ns_rr_rdata(rr), &rrlen);
+    buf = sdt_dns_dec_CNAME(ss, (const u_char *)ns_rr_rdata(rr), &rrlen);
     break;
   case ns_t_null:
-    buf = sdt_dns_dec_NULL(ss, (u_char *)ns_rr_rdata(rr), &rrlen);
+    buf = sdt_dns_dec_NULL(ss, (const u_char *)ns_rr_rdata(rr), &rrlen);
     break;
   }
 #if 0
@@ -239,9 +239,9 @@ char *sdt_dns_parse(SDT_STATE *ss, char *pkt, int *pktlen) {
   return buf;
 }
 
-char *sdt_dns_dec_TXT(SDT_STATE *ss, u_char *data, u_int16_t *n) {
-  u_char *p = NULL;
-  u_char *dp = NULL;
+char *sdt_dns_dec_TXT(SDT_STATE *ss, const u_char *data, u_int16_t *n) {
+  const u_char *p = NULL;
+  const u_char *dp = NULL;
   char *buf = NULL;
   size_t len = 0;
 
@@ -296,7 +296,7 @@ char *sdt_dns_dec_TXT(SDT_STATE *ss, u_char *data, u_int16_t *n) {
   return buf;
 }
 
-char *sdt_dns_dec_CNAME(SDT_STATE *ss, u_char *data, u_int16_t *n) {
+char *sdt_dns_dec_CNAME(SDT_STATE *ss, const u_char *data, u_int16_t *n) {
   char *p = NULL;
   char *buf = NULL;
   char b32[NS_PACKETSZ] = {0};
@@ -317,7 +317,7 @@ char *sdt_dns_dec_CNAME(SDT_STATE *ss, u_char *data, u_int16_t *n) {
   return buf;
 }
 
-char *sdt_dns_dec_NULL(SDT_STATE *ss, u_char *data, u_int16_t *n) {
+char *sdt_dns_dec_NULL(SDT_STATE *ss, const u_char *data, u_int16_t *n) {
   char *out = NULL;
   size_t outlen = 0;
   char *lf = NULL;
@@ -327,7 +327,7 @@ char *sdt_dns_dec_NULL(SDT_STATE *ss, u_char *data, u_int16_t *n) {
     return NULL;
 
   /* Remove base64 linefeeds used for formatting */
-  while ((lf = strchr((char *)data, 0x0A)) != NULL)
+  while ((lf = strchr((const char *)data, 0x0A)) != NULL)
     (void)memmove(lf, lf + 1, strlen(lf));
 
   outlen = *n * 3 / 4 + 1;
@@ -339,7 +339,7 @@ char *sdt_dns_dec_NULL(SDT_STATE *ss, u_char *data, u_int16_t *n) {
   if (outlen >= NS_PACKETSZ)
     errx(EXIT_FAILURE, "buffer overflow v2, biatch!");
 
-  len = b64_pton((char *)data, (u_char *)out, outlen);
+  len = b64_pton((const char *)data, (u_char *)out, outlen);
 
   if (len <= 0) {
     VERBOSE(0, "Invalid base64 encoded packet\n");
