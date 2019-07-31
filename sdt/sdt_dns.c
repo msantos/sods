@@ -1,4 +1,4 @@
-/* Copyright (c) 2009-2016, Michael Santos <michael.santos@gmail.com>
+/* Copyright (c) 2009-2019, Michael Santos <michael.santos@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -23,6 +23,10 @@
 
 #include "sdt.h"
 #include "sdt_servers.h"
+
+char *sdt_dns_dec_CNAME(SDT_STATE *ss, const u_char *data, u_int16_t *n);
+char *sdt_dns_dec_TXT(SDT_STATE *ss, const u_char *data, u_int16_t *n);
+char *sdt_dns_dec_NULL(SDT_STATE *ss, const u_char *data, u_int16_t *n);
 
 int nx = 0;
 
