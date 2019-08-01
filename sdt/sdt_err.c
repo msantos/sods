@@ -12,11 +12,10 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
-#ifndef HAVE_ERRX
 #include <stdarg.h>
-
 #include "sdt.h"
 
+#ifndef HAVE_ERRX
 extern char *__progname;
 
 void sdt_err(int rv, char *fmt, ...) {
