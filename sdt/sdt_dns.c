@@ -305,6 +305,8 @@ char *sdt_dns_dec_CNAME(SDT_STATE *ss, const u_char *data, u_int16_t *n) {
   char *buf = NULL;
   char b32[NS_PACKETSZ] = {0};
 
+  (void)ss;
+
   IS_NULL(buf = calloc(NS_PACKETSZ, 1));
 
   if (dn_expand((const u_char *)data, (const u_char *)data + *n,
@@ -413,6 +415,8 @@ void sdt_dns_print_servers(SDT_STATE *ss) {
   SDS_SERV *ds = NULL;
   int ns = 0;
   char *last = NULL;
+
+  (void)ss;
 
   for (ds = dnsserv; ds->name; ds++, ns++) {
     if (last && (strcmp(last, ds->name) != 0))
