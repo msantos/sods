@@ -27,6 +27,8 @@
 
 #include <netdb.h>
 
+#include "strtonum.h"
+
 #define SDT_VERSION "0.12.0"
 
 #ifdef HAVE_ERRX
@@ -184,8 +186,3 @@ void sdt_errx(int rv, char *fmt, ...);
 void sdt_warn(char *fmt, ...);
 void sdt_warnx(char *fmt, ...);
 #endif /* HAVE_ERRX */
-
-#ifndef HAVE_STRTONUM
-long long strtonum(const char *numstr, long long minval, long long maxval,
-                   const char **errstrp);
-#endif
